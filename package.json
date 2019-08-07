@@ -38,6 +38,10 @@
   },
   "dependencies": {
     "antd": "^3.20.7",
+    "cytoscape": "^3.8.2",
+    "cytoscape-cola": "^2.3.0",
+    "cytoscape-context-menus": "^3.0.6",
+    "jquery": "^3.4.1",
     "papaparse": "^5.0.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
