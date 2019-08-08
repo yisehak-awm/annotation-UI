@@ -12,8 +12,19 @@ import {
   Button,
   Row,
   Col,
-  message
+  message,
+  notification
 } from "antd";
+import Header from "../../components/header";
+import { Annotate } from "../../proto/annotation_pb_service";
+import { grpc } from "grpc-web-client";
+import {
+  AnnotationRequest,
+  Annotation,
+  Gene,
+  Filter
+} from "../../proto/annotation_pb";
+import { GRPC_ADDR, capitalizeFirstLetter } from "../../service";
 import "./style.css";
 
 const GeneGoOptions = [
@@ -37,6 +48,8 @@ function AnnotationForm(props) {
   const [pathways, setPathways] = useState(["reactome"]);
   const [includeSmallMolecules, setIncludeSmallMolecules] = useState(false);
   const [includeProtiens, setIncludeProtiens] = useState(true);
+  const [response, setResponse] = useState(undefined);
+  const [loading, setLoading] = useState(false);
   const [GOSubgroups, setGOSubgroups] = useState([
     "biological_process",
     "cellular_component",
@@ -47,10 +60,13 @@ function AnnotationForm(props) {
   );
 
   const addGene = e => {
-    const gene = e.target.value.toUpperCase();
-    genes.includes(gene)
+    const gene = e.target.value
+      .trim()
+      .toUpperCase()
+      .split(" ");
+    gene.some(g => genes.includes(g))
       ? message.warn("Gene already exists!")
-      : setGenes([...genes, gene]);
+      : setGenes([...genes, ...gene]);
     geneInputRef.current.setValue("");
   };
 
@@ -70,8 +86,92 @@ function AnnotationForm(props) {
     reader.readAsText(file);
   };
 
+  const handleSubmit = () => {
+    setLoading(true);
+    const annotationRequest = new AnnotationRequest();
+    annotationRequest.setGenesList(
+      genes.map(g => {
+        const gene = new Gene();
+        gene.setGenename(g);
+        return gene;
+      })
+    );
+    annotationRequest.setAnnotationsList(
+      annotations.map(sa => {
+        const annotation = new Annotation();
+        annotation.setFunctionname(sa);
+        if (sa === "gene-go-annotation") {
+          const namespace = new Filter();
+          namespace.setFilter("namespace");
+          namespace.setValue(GOSubgroups.toString().replace(",", " "));
+          console.log(GOSubgroups);
+          const nop = new Filter();
+          console.log(parents);
+          nop.setFilter("parents");
+          nop.setValue(parents);
+          annotation.setFiltersList([namespace, nop]);
+        } else if (sa === "gene-pathway-annotation") {
+          const ps = new Filter();
+          ps.setFilter("namespace");
+          ps.setValue(pathways.toString().replace(",", " "));
+          const ism = new Filter();
+          ism.setFilter("include_small_molecule");
+          console.log("1");
+          ism.setValue(capitalizeFirstLetter(includeSmallMolecules.toString()));
+          console.log("2");
+          const ip = new Filter();
+          ip.setFilter("include_prot");
+          ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
+          annotation.setFiltersList([ps, ism, ip]);
+        } else if (sa === "biogrid-interaction-annotation") {
+          annotation.setFiltersList([]);
+        }
+        return annotation;
+      })
+    );
+    grpc.unary(Annotate.Annotate, {
+      request: annotationRequest,
+      host: GRPC_ADDR,
+      onEnd: ({ status, statusMessage, message: msg }) => {
+        setLoading(false);
+        if (status === grpc.Code.OK) {
+          setResponse(msg.array[0]);
+          console.log(msg.array[0]);
+          props.history.push({
+            pathname: `/result/${msg.array[0].substr(
+              msg.array[0].indexOf("id=") + 3
+            )}`
+          });
+        } else {
+          if (statusMessage.includes("Gene Doesn't exist")) {
+            const invalidGenes = statusMessage
+              .split("`")[1]
+              .split(",")
+              .map(g => g.trim())
+              .filter(g => g);
+            setGenes(genes.filter(g => !invalidGenes.includes(g)));
+            notification.error({
+              message: "An error occurred",
+              description: statusMessage,
+              duration: 0,
+              placement: "bottomRight"
+            });
+          } else {
+            notification.error({
+              message: "An error occurred",
+              description: statusMessage,
+              duration: 0,
+              placement: "bottomRight"
+            });
+          }
+        }
+      }
+    });
+  };
+
   return (
     <div className="container form-wrapper">
+      <Header />
       <Row>
         <Col
           xs={{ span: 24 }}
@@ -211,8 +311,10 @@ function AnnotationForm(props) {
               type="primary"
               icon="check"
               disabled={!annotations.length || !genes.length}
+              onClick={handleSubmit}
+              loading={loading}
             >
-              Submit
+              {loading ? "Processing annotation request ..." : "Submit"}
             </Button>
           </div>
         </Col>
@@ -221,4 +323,5 @@ function AnnotationForm(props) {
   );
 }
 
-export default AnnotationForm;
+import { withRouter } from "react-router-dom";
+export default withRouter(AnnotationForm);
