@@ -1,33 +1,10 @@
 import React, { useState, useEffect } from "react";
 import { Button, Modal, Spin, Tabs, Table, Collapse } from "antd";
+
 import * as papa from "papaparse";
+import "./style.css";
 
-export const SERVER_ADDRESS = process.env.SERVICE_ADDR
-  ? process.env.SERVICE_ADDR
-  : "http://mozi.ai:3002";
-
-export const getParameterValueFromURL = variable => {
-  const vars = window.location.search.substring(1).split("&");
-  for (var i = 0; i < vars.length; i++) {
-    var pair = vars[i].split("=");
-    if (pair[0] == variable) {
-      return pair[1];
-    }
-  }
-  return null;
-};
-
-export const downloadSchemeFile = () => {
-  window.open(
-    `${SERVER_ADDRESS}/result_file/${getParameterValueFromURL("id")}`
-  );
-};
-
-export const downloadCSVFile = fileName => {
-  window.open(`${SERVER_ADDRESS}/csv_file/${fileName}`);
-};
-
-export function ResultTables(props) {
+function ResultTables(props) {
   const [tab, setTab] = useState(0);
   const { handleClose, tables, fetchTableData } = props;
 
@@ -181,3 +158,5 @@ export function ResultTables(props) {
     </Modal>
   );
 }
+
+export default ResultTables;
