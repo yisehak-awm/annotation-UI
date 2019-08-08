@@ -45,7 +45,8 @@ module.exports = {
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
-        SERVICE_ADDR: JSON.stringify(process.env.SERVICE_ADDR)
+        GRPC_ADDR: JSON.stringify(process.env.GRPC_ADDR),
+        RESULT_ADDR: JSON.stringify(process.env.RESULT_ADDR)
       }
     }),
     new HtmlWebpackPlugin({
