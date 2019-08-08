@@ -1,0 +1,15 @@
+.header {
+  width: 100%;
+  text-align: center;
+}
+
+.logo {
+  width: 45px;
+  margin-right: 15px;
+}
+
+.header .title {
+  font-size: 1.5em;
+  font-weight: bold;
+  display: block;
+}
