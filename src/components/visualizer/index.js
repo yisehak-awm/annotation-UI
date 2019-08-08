@@ -9,7 +9,9 @@ import $ from "jquery";
 const cytoscape = require("cytoscape");
 const cola = require("cytoscape-cola");
 const contextMenus = require("cytoscape-context-menus");
+const Color = require("color");
 contextMenus(cytoscape, $);
+import "./style.css";
 
 const AnnotationGroups = [
   {
@@ -107,7 +109,7 @@ const CYTOSCAPE_STYLE = [
   }
 ];
 
-export function Visualizer(props) {
+function Visualizer(props) {
   cytoscape.use(cola);
   const cy_wrapper = React.createRef();
   const [cy, setCy] = useState(undefined);
@@ -386,7 +388,9 @@ export function Visualizer(props) {
               style: {
                 "background-color": annotation.color,
                 "text-outline-color": annotation.color,
-                "line-color": `${annotation.color}AA`
+                "line-color": Color(annotation.color)
+                  .lighten(0.6)
+                  .hex()
               }
             },
             ...subGroupColors
@@ -492,13 +496,6 @@ export function Visualizer(props) {
         <Tooltip placement="right" title="Save screenshot">
           <Button size="large" icon="camera" onClick={takeScreenshot} />
         </Tooltip>
-        <Tooltip placement="right" title="Download scheme file">
-          <Button
-            size="large"
-            icon="file-text"
-            onClick={props.downloadSchemeFile}
-          />
-        </Tooltip>
         <Tooltip placement="right" title="Download graph as JSON">
           <Button size="large" icon="share-alt" onClick={downloadGraphJSON} />
         </Tooltip>
@@ -508,10 +505,14 @@ export function Visualizer(props) {
             <div>
               <p>
                 Use the checkboxes to the right to filter the graph by
-                annotations.
+                annotations and node types.
               </p>
-              <p>Click on a gene node to see annotations connected to it.</p>
-              <p>Click on an annotation to see which genes it annotates.</p>
+              <p>Right click on a node to perform actions on it.</p>
+              <p>
+                You may download the graph JSON and view it on Cytoscape
+                desktop.
+              </p>
+              <p>The search is case sensitive.</p>
             </div>
           }
         >
@@ -537,9 +538,10 @@ export function Visualizer(props) {
             </Tree>
           </Collapse.Panel>
         </Collapse>
-        <Collapse bordered={false}>
+        <Collapse bordered={false} defaultActiveKey={["annotation"]}>
           <Collapse.Panel header="Annotations" key="annotation">
             <Tree
+              defaultExpandAll
               defaultCheckedKeys={[]}
               onCheck={setVisibleAnnotations}
               checkable
@@ -611,3 +613,5 @@ export function Visualizer(props) {
     </Fragment>
   );
 }
+
+export default Visualizer;
