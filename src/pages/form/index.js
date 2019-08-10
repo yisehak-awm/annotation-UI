@@ -104,9 +104,7 @@ function AnnotationForm(props) {
           const namespace = new Filter();
           namespace.setFilter("namespace");
           namespace.setValue(GOSubgroups.toString().replace(",", " "));
-          console.log(GOSubgroups);
           const nop = new Filter();
-          console.log(parents);
           nop.setFilter("parents");
           nop.setValue(parents);
           annotation.setFiltersList([namespace, nop]);
@@ -116,15 +114,20 @@ function AnnotationForm(props) {
           ps.setValue(pathways.toString().replace(",", " "));
           const ism = new Filter();
           ism.setFilter("include_small_molecule");
-          console.log("1");
           ism.setValue(capitalizeFirstLetter(includeSmallMolecules.toString()));
-          console.log("2");
           const ip = new Filter();
           ip.setFilter("include_prot");
           ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
           annotation.setFiltersList([ps, ism, ip]);
         } else if (sa === "biogrid-interaction-annotation") {
-          annotation.setFiltersList([]);
+          const int = new Filter();
+          int.setFilter("interaction");
+          int.setValue(
+            annotations.includes("gene-pathway-annotation") && includeProtiens
+              ? "Proteins"
+              : "Genes"
+          );
+          annotation.setFiltersList([int]);
         }
         return annotation;
       })
@@ -153,14 +156,14 @@ function AnnotationForm(props) {
             notification.error({
               message: "An error occurred",
               description: statusMessage,
-              duration: 0,
+              duration: 10,
               placement: "bottomRight"
             });
           } else {
             notification.error({
               message: "An error occurred",
               description: statusMessage,
-              duration: 0,
+              duration: 10,
               placement: "bottomRight"
             });
           }

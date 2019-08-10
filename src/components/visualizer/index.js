@@ -25,7 +25,7 @@ const AnnotationGroups = [
   {
     group: "gene-pathway-annotation",
     color: "#9B59B6",
-    subgroups: [{ subgroup: "Reactome" }, { subgroup: "ChEBI" }]
+    subgroups: [{ subgroup: "Reactome" }]
   },
   {
     group: "biogrid-interaction-annotation",
@@ -118,7 +118,8 @@ function Visualizer(props) {
   const [contextMenu, setContextMenu] = useState(undefined);
   const [visibleNodeTypes, setVisibleNodeTypes] = useState([
     "Genes",
-    "Uniprot"
+    "Uniprot",
+    "ChEBI"
   ]);
   const [visibleAnnotations, setVisibleAnnotations] = useState(["main%"]);
   const [selectedNode, setSelectedNode] = useState({
@@ -334,7 +335,7 @@ function Visualizer(props) {
           const [g, sg] = a.split("%");
           return (
             group.includes(g) &&
-            (["Genes", "Uniprot"].includes(subgroup)
+            (["Genes", "Uniprot", "ChEBI"].includes(subgroup)
               ? visibleNodeTypes.includes(subgroup)
               : sg
               ? sg === subgroup
@@ -535,6 +536,7 @@ function Visualizer(props) {
             >
               <Tree.TreeNode key="Genes" title="Genes" />
               <Tree.TreeNode key="Uniprot" title="Protiens" />
+              <Tree.TreeNode key="ChEBI" title="ChEBI" />
             </Tree>
           </Collapse.Panel>
         </Collapse>
