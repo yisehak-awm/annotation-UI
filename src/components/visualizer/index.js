@@ -491,9 +491,6 @@ function Visualizer(props) {
     <Fragment>
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
-        <Tooltip placement="right" title="Go back">
-          <Button size="large" icon="arrow-left" onClick={props.back} />
-        </Tooltip>
         <Tooltip placement="right" title="Randomize layout">
           <Button size="large" icon="swap" onClick={randomLayout} />
         </Tooltip>
