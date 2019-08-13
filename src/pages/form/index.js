@@ -103,7 +103,7 @@ function AnnotationForm(props) {
         if (sa === "gene-go-annotation") {
           const namespace = new Filter();
           namespace.setFilter("namespace");
-          namespace.setValue(GOSubgroups.toString().replace(",", " "));
+          namespace.setValue(GOSubgroups.join(" "));
           const nop = new Filter();
           nop.setFilter("parents");
           nop.setValue(parents);
@@ -111,7 +111,7 @@ function AnnotationForm(props) {
         } else if (sa === "gene-pathway-annotation") {
           const ps = new Filter();
           ps.setFilter("namespace");
-          ps.setValue(pathways.toString().replace(",", " "));
+          ps.setValue(pathways.join(" "));
           const ism = new Filter();
           ism.setFilter("include_small_molecule");
           ism.setValue(capitalizeFirstLetter(includeSmallMolecules.toString()));
