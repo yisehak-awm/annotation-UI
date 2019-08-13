@@ -2,6 +2,7 @@ import React, { useState, useEffect, Fragment } from "react";
 import { Button, Modal, Spin, Tabs, Table, Collapse, Typography } from "antd";
 import * as papa from "papaparse";
 import "./style.css";
+import { downloadCSVFile } from "../../service";
 
 const parseTable = tableData => papa.parse(tableData);
 const width = document.body.clientWidth || window.screen.width;
