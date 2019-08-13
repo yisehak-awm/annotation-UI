@@ -80,9 +80,7 @@ function AnnotationResult(props) {
               {
                 <span>
                   {response.statusMessage}. Try to
-                  <Link to="/">
-                    <Icon type="arrow-left" /> run another annotation
-                  </Link>
+                  <Link to="/">run another annotation</Link>
                 </span>
               }
             </span>
