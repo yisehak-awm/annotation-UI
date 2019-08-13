@@ -116,6 +116,15 @@ function Visualizer(props) {
   const [layout, setLayout] = useState(undefined);
   const [filteredElements, setFilteredElements] = useState(undefined);
   const [contextMenu, setContextMenu] = useState(undefined);
+  const [nodeTypes, setNodeTypes] = useState(
+    props.graph.nodes
+      .map(n => n.data.subgroup)
+      .filter((s, i, arr) => {
+        return (
+          arr.indexOf(s) === i && ["Genes", "Uniprot", "ChEBI"].includes(s)
+        );
+      })
+  );
   const [visibleNodeTypes, setVisibleNodeTypes] = useState([
     "Genes",
     "Uniprot",
@@ -530,13 +539,13 @@ function Visualizer(props) {
         <Collapse bordered={false} defaultActiveKey={["types"]}>
           <Collapse.Panel header="Node types" key="types">
             <Tree
-              defaultCheckedKeys={visibleNodeTypes}
+              defaultCheckedKeys={nodeTypes}
               onCheck={setVisibleNodeTypes}
               checkable
             >
-              <Tree.TreeNode key="Genes" title="Genes" />
-              <Tree.TreeNode key="Uniprot" title="Protiens" />
-              <Tree.TreeNode key="ChEBI" title="ChEBI" />
+              {nodeTypes.map(n => (
+                <Tree.TreeNode key={n} title={n} />
+              ))}
             </Tree>
           </Collapse.Panel>
         </Collapse>
