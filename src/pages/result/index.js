@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
-import { Button, Alert, Spin, Typography } from "antd";
+import { Button, Alert, Spin, Typography, Icon } from "antd";
 import { parse, distanceInWordsToNow } from "date-fns";
 import { RESULT_ADDR, downloadSchemeFile } from "../../service";
 import { Link } from "react-router-dom";
@@ -80,7 +80,9 @@ function AnnotationResult(props) {
               {
                 <span>
                   {response.statusMessage}. Try to
-                  <Link to="/"> run another annotation</Link>
+                  <Link to="/">
+                    <Icon type="arrow-left" /> run another annotation
+                  </Link>
                 </span>
               }
             </span>
@@ -112,7 +114,10 @@ function AnnotationResult(props) {
           </Button>
         </div>
         <Typography.Paragraph className="call-to-action">
-          <Link to="/">Run another annotation</Link>
+          <Link to="/">
+            <Icon type="arrow-left" />
+            Run another annotation
+          </Link>
         </Typography.Paragraph>
       </Fragment>
     );

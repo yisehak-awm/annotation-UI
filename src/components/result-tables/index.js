@@ -1,10 +1,89 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, Fragment } from "react";
 import { Button, Modal, Spin, Tabs, Table, Collapse, Typography } from "antd";
 import * as papa from "papaparse";
 import "./style.css";
 
 const parseTable = tableData => papa.parse(tableData);
 const width = document.body.clientWidth || window.screen.width;
+
+const BiogridColumns = [
+  {
+    title: "",
+    dataIndex: "serial-number",
+    render: (value, row, index) => {
+      const obj = {
+        children: value,
+        props: {}
+      };
+
+      return obj;
+    }
+  },
+  {
+    title: "Location",
+    name: "Location",
+    dataIndex: "location",
+    key: "location"
+  },
+  {
+    title: "Protiens",
+    name: "Protiens",
+    dataIndex: "protiens",
+    key: "protiens"
+  },
+  {
+    title: "Interacting genes",
+    name: "Interacting genes",
+    dataIndex: "interacting-genes",
+    key: "interacting-genes"
+  },
+  {
+    title: "PMID",
+    name: "PMID",
+    dataIndex: "pmid",
+    key: "pmid",
+    render: text => (
+      <Fragment>
+        {text
+          .trim()
+          .split(",")
+          .map(t => (
+            <a style={{ marginRight: 15 }} href={t} target="_blank">
+              {t.slice(t.indexOf("=") + 1, t.length)}
+            </a>
+          ))}
+      </Fragment>
+    )
+  }
+];
+
+const PathwayColumns = [
+  {
+    title: "",
+    dataIndex: "serial-number",
+    render: (value, row, index) => {
+      const obj = {
+        children: value,
+        props: {}
+      };
+
+      return obj;
+    }
+  },
+  { title: "Gene", name: "Gene", dataIndex: "gene", key: "gene" },
+  {
+    title: "Protien",
+    name: "Protien",
+    dataIndex: "protien",
+    key: "protien"
+  },
+  {
+    title: "Small molecule",
+    name: "Small molecule",
+    dataIndex: "small-molecule",
+    key: "small-molecule"
+  }
+];
 
 const GOcolumns = [
   {
@@ -77,19 +156,31 @@ function ResultTables(props) {
             <Typography.Paragraph>{table[1][i * 6 + 1]}</Typography.Paragraph>
             <Table
               columns={GOcolumns}
-              dataSource={tableData.map((row, j) => {
-                const values = row.slice(i * 6 + 1, i * 6 + 7);
-                return {
-                  key: `${g}-row-${j}`,
-                  "serial-number": j + 1,
-                  "mf-name": values[0] || "-",
-                  "mf-id": values[1] || "-",
-                  "bp-name": values[2] || "-",
-                  "bp-id": values[3] || "-",
-                  "cc-name": values[4] || "-",
-                  "cc-id": values[5] || "-"
-                };
-              })}
+              dataSource={tableData
+                .filter(row => {
+                  const values = row.slice(i * 6 + 1, i * 6 + 7);
+                  return (
+                    values[0] ||
+                    values[1] ||
+                    values[2] ||
+                    values[3] ||
+                    values[4] ||
+                    values[5]
+                  );
+                })
+                .map((row, j) => {
+                  const values = row.slice(i * 6 + 1, i * 6 + 7);
+                  return {
+                    key: `${g}-row-${j}`,
+                    "serial-number": j + 1,
+                    "mf-name": values[0] || "-",
+                    "mf-id": values[1] || "-",
+                    "bp-name": values[2] || "-",
+                    "bp-id": values[3] || "-",
+                    "cc-name": values[4] || "-",
+                    "cc-id": values[5] || "-"
+                  };
+                })}
               bordered
               size="small"
             />
@@ -100,71 +191,82 @@ function ResultTables(props) {
   };
 
   const renderPathwayTable = () => {
-    return "Pathway table is under construction.";
+    const data = tables.find(t => t.displayName === "PATHWAY").data;
+    const table = parseTable(data).data;
+    const pathways = table[0]
+      .slice(1)
+      .filter((g, i) => table[0].indexOf(g) === i);
+    const tableData = table.slice(3);
+    return (
+      <Collapse>
+        {pathways.map((p, i) => (
+          <Collapse.Panel header={p} key={p}>
+            <Typography.Paragraph>{table[1][i * 3 + 1]}</Typography.Paragraph>
+            <Table
+              columns={PathwayColumns}
+              dataSource={tableData
+                .filter(row => {
+                  const values = row.slice(i * 3 + 1, i * 3 + 4);
+                  return values[0] || values[1] || values[2];
+                })
+                .map((row, j) => {
+                  const values = row.slice(i * 3 + 1, i * 3 + 4);
+                  return {
+                    key: `${p}-row-${j}`,
+                    "serial-number": j + 1,
+                    gene: values[0] || "-",
+                    protien: values[1] || "-",
+                    "small-molecule": values[2] || "-"
+                  };
+                })}
+              bordered
+              size="small"
+            />
+          </Collapse.Panel>
+        ))}
+      </Collapse>
+    );
   };
 
   const renderBiogridTable = () => {
-    return "Biogrid table is under construction.";
+    const data = tables.find(t => t.displayName === "BIOGRID").data;
+    const table = parseTable(data).data;
+    const pathways = table[0]
+      .slice(1)
+      .filter((g, i) => table[0].indexOf(g) === i);
+    console.log(pathways);
+    const tableData = table.slice(3);
+    return (
+      <Collapse>
+        {pathways.map((p, i) => (
+          <Collapse.Panel header={p} key={p}>
+            <Typography.Paragraph>{table[1][i * 4 + 1]}</Typography.Paragraph>
+            <Table
+              columns={BiogridColumns}
+              dataSource={tableData
+                .filter(row => {
+                  const values = row.slice(i * 4 + 1, i * 4 + 5);
+                  return values[0] || values[1] || values[2] || values[3];
+                })
+                .map((row, j) => {
+                  const values = row.slice(i * 4 + 1, i * 4 + 5);
+                  return {
+                    key: `${p}-row-${j}`,
+                    "serial-number": j + 1,
+                    location: values[0] || "-",
+                    protiens: values[1] || "-",
+                    "interacting-genes": values[2] || "-",
+                    pmid: values[3] || "-"
+                  };
+                })}
+              bordered
+              size="small"
+            />
+          </Collapse.Panel>
+        ))}
+      </Collapse>
+    );
   };
-
-  // const renderPathwayTable = () => {
-  //   const table = parseTable(tables.find(t => t.displayName === "PATHWAY").data)
-  //     .data;
-  //   const keys = table[0].slice(1);
-  //   const values = table.slice(1);
-  //   const columns = keys.slice(2).map(c => ({
-  //     title: c,
-  //     dataIndex: c,
-  //     key: c,
-  //     width: 100
-  //   }));
-
-  //   return (
-  //     <Collapse defaultActiveKey={["1"]}>
-  //       {values.map(row => {
-  //         if (row.length < keys.length) return;
-  //         const rowData = {};
-  //         for (let j = 0; j < columns.length; j++) {
-  //           rowData[columns[j].key] = row.slice(2)[j + 1];
-  //           rowData["key"] = `row${j}`;
-  //         }
-  //         return (
-  //           <Collapse.Panel header={row[1]} key={row[1]}>
-  //             <div className="table-definition-wrapper">
-  //               <p>
-  //                 <span className="title">Name:</span> {row[1]}
-  //               </p>
-  //               <p>
-  //                 <span className="title">Definition:</span> {row[2]}
-  //               </p>
-  //             </div>
-  //             <Table columns={columns} dataSource={[rowData]} size="small" />
-  //           </Collapse.Panel>
-  //         );
-  //       })}
-  //     </Collapse>
-  //   );
-  // };
-
-  // const renderBiogridTable = () => {
-  //   const table = parseTable(tables.find(t => t.displayName === "BIOGRID").data)
-  //     .data;
-  //   const columns = table[0].slice(1).map(c => ({
-  //     title: c,
-  //     dataIndex: c,
-  //     key: c,
-  //     width: 1000 / table[0].slice(1).length
-  //   }));
-  //   const dataSource = table.slice(1).map((r, i, self) => {
-  //     const row = {};
-  //     for (let j = 0; j < columns.length; j++) {
-  //       row[columns[j].key] = r[j + 1];
-  //       row["key"] = `${i}row${j}`;
-  //     }
-  //     return row;
-  //   });
-  //   return <Table columns={columns} dataSource={dataSource} size="small" />;
-  // };
 
   return (
     <Modal
