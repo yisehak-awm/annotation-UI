@@ -51,11 +51,15 @@ const BiogridColumns = [
         {text
           .trim()
           .split(",")
-          .map(t => (
-            <a style={{ marginRight: 15 }} href={t} target="_blank">
-              {t.slice(t.indexOf("=") + 1, t.length)}
-            </a>
-          ))}
+          .map(t =>
+            t.includes("http") ? (
+              <a style={{ marginRight: 15 }} href={t} target="_blank">
+                {t.slice(t.indexOf("=") + 1, t.length)}
+              </a>
+            ) : (
+              t
+            )
+          )}
       </Fragment>
     )
   }
