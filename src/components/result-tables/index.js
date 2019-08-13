@@ -2,7 +2,7 @@ import React, { useState, useEffect, Fragment } from "react";
 import { Button, Modal, Spin, Tabs, Table, Collapse, Typography } from "antd";
 import * as papa from "papaparse";
 import "./style.css";
-import { downloadCSVFile } from "../../service";
+import { downloadCSVFile, downloadExcelFile } from "../../service";
 
 const parseTable = tableData => papa.parse(tableData);
 const width = document.body.clientWidth || window.screen.width;
@@ -18,7 +18,8 @@ const BiogridColumns = [
       };
 
       return obj;
-    }
+    },
+    width: 200
   },
   {
     title: "Location",
@@ -30,16 +31,18 @@ const BiogridColumns = [
     title: "Protiens",
     name: "Protiens",
     dataIndex: "protiens",
-    key: "protiens"
+    key: "protiens",
+    width: 200
   },
   {
     title: "Interacting genes",
     name: "Interacting genes",
     dataIndex: "interacting-genes",
-    key: "interacting-genes"
+    key: "interacting-genes",
+    width: 200
   },
   {
-    title: "PMID",
+    title: "PubMed ID",
     name: "PMID",
     dataIndex: "pmid",
     key: "pmid",
@@ -69,14 +72,16 @@ const PathwayColumns = [
       };
 
       return obj;
-    }
+    },
+    width: 200
   },
-  { title: "Gene", name: "Gene", dataIndex: "gene", key: "gene" },
+  { title: "Gene", name: "Gene", dataIndex: "gene", key: "gene", width: 200 },
   {
     title: "Protien",
     name: "Protien",
     dataIndex: "protien",
-    key: "protien"
+    key: "protien",
+    width: 200
   },
   {
     title: "Small molecule",
@@ -97,12 +102,13 @@ const GOcolumns = [
       };
 
       return obj;
-    }
+    },
+    width: 200
   },
   {
     title: "GO molecular function",
     children: [
-      { title: "ID", name: "ID", dataIndex: "mf-id", key: "mf-id", width: 100 },
+      { title: "ID", name: "ID", dataIndex: "mf-id", key: "mf-id", width: 200 },
       {
         title: "Name",
         name: "Name",
@@ -114,7 +120,7 @@ const GOcolumns = [
   {
     title: "GO biological process",
     children: [
-      { title: "ID", name: "ID", dataIndex: "bp-id", key: "bp-id", width: 100 },
+      { title: "ID", name: "ID", dataIndex: "bp-id", key: "bp-id", width: 200 },
       {
         title: "Name",
         name: "Name",
@@ -126,7 +132,7 @@ const GOcolumns = [
   {
     title: "GO cellular component",
     children: [
-      { title: "ID", name: "ID", dataIndex: "cc-id", key: "cc-id", width: 100 },
+      { title: "ID", name: "ID", dataIndex: "cc-id", key: "cc-id", width: 200 },
       {
         title: "Name",
         name: "Name",
@@ -286,16 +292,28 @@ function ResultTables(props) {
           }}
           tabBarExtraContent={
             tables[tab].data && (
-              <Button
-                ghost
-                type="primary"
-                icon="download"
-                style={{ marginRight: 60 }}
-                size="small"
-                onClick={() => downloadCSVFile(tables[tab].fileName)}
-              >
-                {`Download ${tables[tab].displayName} data`}
-              </Button>
+              <Fragment>
+                <Button
+                  ghost
+                  type="primary"
+                  icon="download"
+                  style={{ marginRight: 60 }}
+                  size="small"
+                  onClick={() => downloadCSVFile(tables[tab].fileName)}
+                >
+                  {`Download ${tables[tab].displayName} csv`}
+                </Button>
+                <Button
+                  ghost
+                  type="primary"
+                  icon="download"
+                  style={{ marginRight: 60 }}
+                  size="small"
+                  onClick={() => downloadExcelFile(tables[tab].fileName)}
+                >
+                  {`Download ${tables[tab].displayName} excel`}
+                </Button>
+              </Fragment>
             )
           }
         >
