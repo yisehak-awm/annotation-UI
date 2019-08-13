@@ -118,7 +118,7 @@ function AnnotationForm(props) {
           const ip = new Filter();
           ip.setFilter("include_prot");
           ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
-          annotation.setFiltersList([ps, ism, ip]);
+          annotation.setFiltersList([ps, ip, ism]);
         } else if (sa === "biogrid-interaction-annotation") {
           const int = new Filter();
           int.setFilter("interaction");

@@ -16,7 +16,7 @@ export const AnnotationStatus = {
 };
 
 export const fetchAnnotationStatus = id => {
-  return fetch(`${RESULT_ADDR}/result/${id}`)
+  return fetch(`${RESULT_ADDR}/${id}`)
     .then(response => response.json())
     .then(response => {
       return response.result
