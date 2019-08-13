@@ -14,6 +14,10 @@ export const downloadCSVFile = fileName => {
   window.open(`${RESULT_ADDR}/csv_file/${fileName}`);
 };
 
+export const downloadExcelFile = fileName => {
+  window.open(`${RESULT_ADDR}/csv_file/${fileName.replace("csv", "xlsx")}`);
+};
+
 export const capitalizeFirstLetter = string => {
   return string[0].toUpperCase() + string.slice(1);
 };

@@ -1,8 +1,8 @@
 import React, { useState, useEffect, Fragment } from "react";
-import { Button, Alert, Spin, Typography } from "antd";
+import { HashRouter as Router, Route, Link, Redirect } from "react-router-dom";
+import { Button, Alert, Spin, Typography, Icon } from "antd";
 import { parse, distanceInWordsToNow } from "date-fns";
 import { RESULT_ADDR, downloadSchemeFile } from "../../service";
-import { Link } from "react-router-dom";
 import TabbedTables from "../../components/result-tables";
 import Visualizer from "../../components/visualizer";
 import Header from "../../components/header";
@@ -32,7 +32,6 @@ export const fetchAnnotationStatus = id => {
 
 function AnnotationResult(props) {
   const [response, setResponse] = useState(undefined);
-  const [isVisualizationShown, setVisualizationShown] = useState(false);
   const [isTableShown, setTableShown] = useState(false);
   const [isFetchingResult, setFetchingResult] = useState(false);
   const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
@@ -80,7 +79,7 @@ function AnnotationResult(props) {
               {
                 <span>
                   {response.statusMessage}. Try to
-                  <Link to="/"> run another annotation</Link>
+                  <Link to="/">run another annotation</Link>
                 </span>
               }
             </span>
@@ -107,12 +106,17 @@ function AnnotationResult(props) {
           <Button onClick={() => downloadSchemeFile(props.match.params.id)}>
             Download Scheme File
           </Button>
-          <Button type="primary" onClick={e => setVisualizationShown(true)}>
-            Visualize the result
+          <Button type="primary">
+            <Link to={`/result/${props.match.params.id}/visualizer`}>
+              Visualize the result
+            </Link>
           </Button>
         </div>
         <Typography.Paragraph className="call-to-action">
-          <Link to="/">Run another annotation</Link>
+          <Link to="/">
+            <Icon type="arrow-left" />
+            Run another annotation
+          </Link>
         </Typography.Paragraph>
       </Fragment>
     );
@@ -134,15 +138,27 @@ function AnnotationResult(props) {
         )}
       </div>
       {/* Show the visualizer */}
-      {isVisualizationShown && (
-        <Visualizer
-          graph={response.result}
-          back={() => setVisualizationShown(false)}
-          annotations={response.result.nodes
-            .reduce((acc, n) => [...acc, ...n.data.group, n.data.subgroup], [])
-            .filter((a, i, self) => a && self.indexOf(a) === i)}
+      <Router>
+        <Route
+          path="/result/:id/visualizer"
+          exact
+          render={() =>
+            response && response.result ? (
+              <Visualizer
+                graph={response.result}
+                annotations={response.result.nodes
+                  .reduce(
+                    (acc, n) => [...acc, ...n.data.group, n.data.subgroup],
+                    []
+                  )
+                  .filter((a, i, self) => a && self.indexOf(a) === i)}
+              />
+            ) : (
+              <Redirect to={`/result/${props.match.params.id}`} />
+            )
+          }
         />
-      )}
+      </Router>
       {/* Show annotations tables */}
       {isTableShown && (
         <TabbedTables
