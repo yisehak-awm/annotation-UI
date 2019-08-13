@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
-import { HashRouter as Router, Route, Link } from "react-router-dom";
+import { HashRouter as Router, Route, Link, Redirect } from "react-router-dom";
 import { Button, Alert, Spin, Typography, Icon } from "antd";
 import { parse, distanceInWordsToNow } from "date-fns";
 import { RESULT_ADDR, downloadSchemeFile } from "../../service";
@@ -142,17 +142,21 @@ function AnnotationResult(props) {
         <Route
           path="/result/:id/visualizer"
           exact
-          render={() => (
-            <Visualizer
-              graph={response.result}
-              annotations={response.result.nodes
-                .reduce(
-                  (acc, n) => [...acc, ...n.data.group, n.data.subgroup],
-                  []
-                )
-                .filter((a, i, self) => a && self.indexOf(a) === i)}
-            />
-          )}
+          render={() =>
+            response && response.result ? (
+              <Visualizer
+                graph={response.result}
+                annotations={response.result.nodes
+                  .reduce(
+                    (acc, n) => [...acc, ...n.data.group, n.data.subgroup],
+                    []
+                  )
+                  .filter((a, i, self) => a && self.indexOf(a) === i)}
+              />
+            ) : (
+              <Redirect to={`/result/${props.match.params.id}`} />
+            )
+          }
         />
       </Router>
       {/* Show annotations tables */}
