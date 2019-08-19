@@ -165,6 +165,10 @@ function ResultTables(props) {
         {genes.map((g, i) => (
           <Collapse.Panel header={g} key={g}>
             <Typography.Paragraph>{table[1][i * 6 + 1]}</Typography.Paragraph>
+
+            <a href={`https://www.ncbi.nlm.nih.gov/gene/?term=${g}`}>
+              Learn more about {g}
+            </a>
             <Table
               columns={GOcolumns}
               dataSource={tableData
@@ -185,11 +189,38 @@ function ResultTables(props) {
                     key: `${g}-row-${j}`,
                     "serial-number": j + 1,
                     "mf-name": values[0] || "-",
-                    "mf-id": values[1] || "-",
+                    "mf-id":
+                      (
+                        <a
+                          href={`http://amigo.geneontology.org/amigo/term/${
+                            values[1]
+                          }`}
+                        >
+                          {values[1]}
+                        </a>
+                      ) || "-",
                     "bp-name": values[2] || "-",
-                    "bp-id": values[3] || "-",
+                    "bp-id":
+                      (
+                        <a
+                          href={`http://amigo.geneontology.org/amigo/term/${
+                            values[3]
+                          }`}
+                        >
+                          {values[3]}
+                        </a>
+                      ) || "-",
                     "cc-name": values[4] || "-",
-                    "cc-id": values[5] || "-"
+                    "cc-id":
+                      (
+                        <a
+                          href={`http://amigo.geneontology.org/amigo/term/${
+                            values[5]
+                          }`}
+                        >
+                          {values[5]}
+                        </a>
+                      ) || "-"
                   };
                 })}
               bordered
@@ -213,6 +244,9 @@ function ResultTables(props) {
         {pathways.map((p, i) => (
           <Collapse.Panel header={p} key={p}>
             <Typography.Paragraph>{table[1][i * 3 + 1]}</Typography.Paragraph>
+            <a href={` http://www.reactome.org/content/detail/${p}`}>
+              Learn more about {p}
+            </a>
             <Table
               columns={PathwayColumns}
               dataSource={tableData
@@ -225,9 +259,36 @@ function ResultTables(props) {
                   return {
                     key: `${p}-row-${j}`,
                     "serial-number": j + 1,
-                    gene: values[0] || "-",
-                    protien: values[1] || "-",
-                    "small-molecule": values[2] || "-"
+                    gene:
+                      (
+                        <a
+                          href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
+                            values[0]
+                          }`}
+                        >
+                          {values[0]}
+                        </a>
+                      ) || "-",
+                    protien:
+                      (
+                        <a
+                          href={`https://www.uniprot.org/uniprot/${values[1].slice(
+                            values[1].indexOf(":") + 1
+                          )}`}
+                        >
+                          {values[1]}
+                        </a>
+                      ) || "-",
+                    "small-molecule":
+                      (
+                        <a
+                          href={`https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${values[2].slice(
+                            values[2].indexOf(":") + 1
+                          )}`}
+                        >
+                          {values[2]}
+                        </a>
+                      ) || "-"
                   };
                 })}
               bordered
@@ -245,13 +306,15 @@ function ResultTables(props) {
     const pathways = table[0]
       .slice(1)
       .filter((g, i) => table[0].indexOf(g) === i);
-    console.log(pathways);
     const tableData = table.slice(3);
     return (
       <Collapse>
         {pathways.map((p, i) => (
           <Collapse.Panel header={p} key={p}>
             <Typography.Paragraph>{table[1][i * 4 + 1]}</Typography.Paragraph>
+            <a href={`https://www.ncbi.nlm.nih.gov/gene/?term=${p}`}>
+              Learn more about {p}
+            </a>
             <Table
               columns={BiogridColumns}
               dataSource={tableData
@@ -265,8 +328,26 @@ function ResultTables(props) {
                     key: `${p}-row-${j}`,
                     "serial-number": j + 1,
                     location: values[0] || "-",
-                    protiens: values[1] || "-",
-                    "interacting-genes": values[2] || "-",
+                    protiens:
+                      (
+                        <a
+                          href={`https://www.uniprot.org/uniprot/${values[1].slice(
+                            values[1].indexOf(":") + 1
+                          )}`}
+                        >
+                          {values[1]}
+                        </a>
+                      ) || "-",
+                    "interacting-genes":
+                      (
+                        <a
+                          href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
+                            values[2]
+                          }`}
+                        >
+                          {values[2]}
+                        </a>
+                      ) || "-",
                     pmid: values[3] || "-"
                   };
                 })}
