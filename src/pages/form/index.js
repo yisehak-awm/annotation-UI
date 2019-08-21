@@ -153,7 +153,7 @@ function AnnotationForm(props) {
               .map(g => g.trim())
               .filter(g => g);
             setGenes(genes.filter(g => !invalidGenes.includes(g)));
-            notification.error({
+            notification.warning({
               message: "An error occurred",
               description: statusMessage,
               duration: 10,
