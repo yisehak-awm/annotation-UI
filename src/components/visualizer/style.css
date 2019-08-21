@@ -50,6 +50,8 @@
   border: solid 1px #87bef5;
   padding: 5px;
   border-radius: 3px;
+  max-height: 500px;
+  overflow-y: scroll;
 }
 
 .annotation-toggle-wrapper {
