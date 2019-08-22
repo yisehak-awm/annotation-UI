@@ -154,7 +154,7 @@ function AnnotationForm(props) {
               .filter(g => g);
             setGenes(genes.filter(g => !invalidGenes.includes(g)));
             notification.warning({
-              message: "An error occurred",
+              message: "Gene not found",
               description: statusMessage,
               duration: 10,
               placement: "bottomRight"
