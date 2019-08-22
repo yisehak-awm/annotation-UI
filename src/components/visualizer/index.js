@@ -11,6 +11,7 @@ const cola = require("cytoscape-cola");
 const contextMenus = require("cytoscape-context-menus");
 const Color = require("color");
 contextMenus(cytoscape, $);
+
 import "./style.css";
 
 const AnnotationGroups = [
@@ -36,10 +37,10 @@ const AnnotationGroups = [
 
 const CYTOSCAPE_COLA_CONFIG = {
   name: "cola",
-  fit: true,
+  // fit: true,
   animate: true,
   padding: 10,
-  nodeSpacing: 20,
+  nodeSpacing: 10,
   maxSimulationTime: 3000,
   ungrabifyWhileSimulating: true,
   randomize: true,
@@ -438,7 +439,7 @@ function Visualizer(props) {
 
   const search = id => {
     cy.batch(function() {
-      const selected = cy.nodes(`[id = "${id}"]`);
+      const selected = cy.nodes(`[id @= "${id}"]`);
       if (selected.size()) {
         selected.select();
         cy.zoom(2);
