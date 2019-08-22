@@ -256,39 +256,54 @@ function ResultTables(props) {
                 })
                 .map((row, j) => {
                   const values = row.slice(i * 3 + 1, i * 3 + 4);
+                  const protien = values[1]
+                    .trim()
+                    .split(" ")
+                    .filter(s => s);
                   return {
                     key: `${p}-row-${j}`,
                     "serial-number": j + 1,
-                    gene:
-                      (
-                        <a
-                          href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                            values[0]
-                          }`}
-                        >
-                          {values[0]}
-                        </a>
-                      ) || "-",
-                    protien:
-                      (
-                        <a
-                          href={`https://www.uniprot.org/uniprot/${values[1].slice(
-                            values[1].indexOf(":") + 1
-                          )}`}
-                        >
-                          {values[1]}
-                        </a>
-                      ) || "-",
-                    "small-molecule":
-                      (
-                        <a
-                          href={`https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${values[2].slice(
-                            values[2].indexOf(":") + 1
-                          )}`}
-                        >
-                          {values[2]}
-                        </a>
-                      ) || "-"
+                    gene: (
+                      <a
+                        href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
+                          values[0]
+                        }`}
+                      >
+                        {values[0]}
+                      </a>
+                    ),
+                    protien: (
+                      <Fragment>
+                        {protien.length > 0 && (
+                          <a
+                            href={`https://www.uniprot.org/uniprot/${protien[0].slice(
+                              protien.indexOf(":") + 1
+                            )}`}
+                            style={{ marginRight: 15 }}
+                          >
+                            {protien[0]}
+                          </a>
+                        )}
+                        {protien.length > 1 && (
+                          <a
+                            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
+                              protien[1]
+                            }`}
+                          >
+                            {protien[1]}
+                          </a>
+                        )}
+                      </Fragment>
+                    ),
+                    "small-molecule": (
+                      <a
+                        href={`https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${values[2].slice(
+                          values[2].indexOf(":") + 1
+                        )}`}
+                      >
+                        {values[2]}
+                      </a>
+                    )
                   };
                 })}
               bordered
@@ -324,30 +339,46 @@ function ResultTables(props) {
                 })
                 .map((row, j) => {
                   const values = row.slice(i * 4 + 1, i * 4 + 5);
+                  const protien = values[1]
+                    .trim()
+                    .split(" ")
+                    .filter(s => s);
                   return {
                     key: `${p}-row-${j}`,
                     "serial-number": j + 1,
                     location: values[0] || "-",
-                    protiens:
-                      (
-                        <a
-                          href={`https://www.uniprot.org/uniprot/${values[1].slice(
-                            values[1].indexOf(":") + 1
-                          )}`}
-                        >
-                          {values[1]}
-                        </a>
-                      ) || "-",
-                    "interacting-genes":
-                      (
-                        <a
-                          href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                            values[2]
-                          }`}
-                        >
-                          {values[2]}
-                        </a>
-                      ) || "-",
+                    protiens: (
+                      <Fragment>
+                        {protien.length > 0 && (
+                          <a
+                            href={`https://www.uniprot.org/uniprot/${protien[0].slice(
+                              protien.indexOf(":") + 1
+                            )}`}
+                            style={{ marginRight: 15 }}
+                          >
+                            {protien[0]}
+                          </a>
+                        )}
+                        {protien.length > 1 && (
+                          <a
+                            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
+                              protien[1]
+                            }`}
+                          >
+                            {protien[1]}
+                          </a>
+                        )}
+                      </Fragment>
+                    ),
+                    "interacting-genes": (
+                      <a
+                        href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
+                          values[2]
+                        }`}
+                      >
+                        {values[2]}
+                      </a>
+                    ),
                     pmid: values[3] || "-"
                   };
                 })}
