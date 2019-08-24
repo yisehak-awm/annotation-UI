@@ -2,7 +2,7 @@ import React, { useState, useEffect, Fragment } from "react";
 import { Button, Modal, Spin, Tabs, Table, Collapse, Typography } from "antd";
 import * as papa from "papaparse";
 import "./style.css";
-import { downloadCSVFile, downloadExcelFile } from "../../service";
+import { downloadCSVFile } from "../../service";
 
 const parseTable = tableData => papa.parse(tableData);
 const width = document.body.clientWidth || window.screen.width;
@@ -415,19 +415,11 @@ function ResultTables(props) {
                   icon="download"
                   style={{ marginRight: 60 }}
                   size="small"
-                  onClick={() => downloadCSVFile(tables[tab].fileName)}
+                  onClick={() =>
+                    downloadCSVFile(props.match.params.id, tables[tab].fileName)
+                  }
                 >
                   {`Download ${tables[tab].displayName} csv`}
-                </Button>
-                <Button
-                  ghost
-                  type="primary"
-                  icon="download"
-                  style={{ marginRight: 60 }}
-                  size="small"
-                  onClick={() => downloadExcelFile(tables[tab].fileName)}
-                >
-                  {`Download ${tables[tab].displayName} excel`}
                 </Button>
               </Fragment>
             )

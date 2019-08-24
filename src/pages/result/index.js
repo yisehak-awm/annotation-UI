@@ -15,40 +15,39 @@ export const AnnotationStatus = {
   ERROR: -1
 };
 
-export const fetchAnnotationStatus = id => {
-  return fetch(`${RESULT_ADDR}/${id}`)
-    .then(response => response.json())
-    .then(response => {
-      return response.result
-        ? Object.assign({}, response, {
-            result: JSON.parse(response.result)
-          })
-        : {
-            status: AnnotationStatus.ERROR,
-            statusMessage: response.response
-          };
-    });
-};
-
 function AnnotationResult(props) {
   const [response, setResponse] = useState(undefined);
   const [isTableShown, setTableShown] = useState(false);
   const [isFetchingResult, setFetchingResult] = useState(false);
   const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
+  const id = props.match.params.id;
 
   useEffect(() => {
-    const id = props.match.params.id;
     if (id) {
       setFetchingResult(true);
-      fetchAnnotationStatus(id).then(response => {
-        setFetchingResult(false);
-        setResponse(response);
-      });
+      fetch(`${RESULT_ADDR}/status/${id}`)
+        .then(res => res.json())
+        .then(res => {
+          if (res.status === 2)
+            return fetch(`${RESULT_ADDR}/${id}`)
+              .then(res => res.json())
+              .then(result => {
+                setFetchingResult(false);
+                setResponse(Object.assign({}, res, { result }));
+              });
+          setFetchingResult(false);
+          setResponse({
+            status: AnnotationStatus.ERROR,
+            statusMessage: res.response
+          });
+        });
     }
   }, []);
 
   const fetchTableData = fileName => {
-    fetch(`${RESULT_ADDR}/csv_file/${fileName}`).then(data => {
+    fetch(
+      `${RESULT_ADDR}/csv_file/${id}/${fileName.substr(0, fileName.length - 4)}`
+    ).then(data => {
       const res = Object.assign({}, response);
       data
         .clone()
@@ -79,7 +78,7 @@ function AnnotationResult(props) {
               {
                 <span>
                   {response.statusMessage}. Try to
-                  <Link to="/">run another annotation</Link>
+                  <Link to="/"> run another annotation</Link>
                 </span>
               }
             </span>
