@@ -96,17 +96,18 @@ function AnnotationForm(props) {
         return gene;
       })
     );
+    // Namespaces and number of parents filters
+    const namespace = new Filter();
+    namespace.setFilter("namespace");
+    namespace.setValue(GOSubgroups.join(" "));
+    const nop = new Filter();
+    nop.setFilter("parents");
+    nop.setValue(parents);
     annotationRequest.setAnnotationsList(
       annotations.map(sa => {
         const annotation = new Annotation();
         annotation.setFunctionname(sa);
         if (sa === "gene-go-annotation") {
-          const namespace = new Filter();
-          namespace.setFilter("namespace");
-          namespace.setValue(GOSubgroups.join(" "));
-          const nop = new Filter();
-          nop.setFilter("parents");
-          nop.setValue(parents);
           annotation.setFiltersList([namespace, nop]);
         } else if (sa === "gene-pathway-annotation") {
           const ps = new Filter();
@@ -118,7 +119,14 @@ function AnnotationForm(props) {
           const ip = new Filter();
           ip.setFilter("include_prot");
           ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
-          annotation.setFiltersList([ps, ip, ism]);
+          annotation.setFiltersList([
+            ps,
+            ip,
+            ism,
+            ...(annotations.includes("gene-go-annotation")
+              ? [namespace, nop]
+              : [])
+          ]);
         } else if (sa === "biogrid-interaction-annotation") {
           const int = new Filter();
           int.setFilter("interaction");
@@ -127,11 +135,18 @@ function AnnotationForm(props) {
               ? "Proteins"
               : "Genes"
           );
-          annotation.setFiltersList([int]);
+          annotation.setFiltersList([
+            int,
+            ...(annotations.includes("gene-go-annotation")
+              ? [namespace, nop]
+              : [])
+          ]);
         }
         return annotation;
       })
     );
+    console.log("The request", annotationRequest);
+
     grpc.unary(Annotate.Annotate, {
       request: annotationRequest,
       host: GRPC_ADDR,
@@ -289,12 +304,6 @@ function AnnotationForm(props) {
                     />
                     {"  "}
                     <div className="label">Small Molecules</div>
-                    <Switch
-                      defaultChecked={includeProtiens}
-                      onChange={setIncludeProtiens}
-                    />
-                    {"  "}
-                    <div className="label">Protiens</div>
                   </div>
                 </div>
               )}
@@ -309,6 +318,14 @@ function AnnotationForm(props) {
               </Checkbox>
             </li>
           </ul>
+          <div className="parameter" style={{ marginTop: 45 }}>
+            <Switch
+              defaultChecked={includeProtiens}
+              onChange={setIncludeProtiens}
+            />
+            {"  "}
+            <div className="label">Include protiens</div>
+          </div>
           <div className="actions">
             <Button
               type="primary"

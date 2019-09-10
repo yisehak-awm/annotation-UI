@@ -21,12 +21,12 @@
   padding-left: 30px;
 }
 
-.annotation-parameters .parameter {
+.parameter {
   display: block;
   margin-bottom: 10px;
 }
 
-.annotation-parameters .parameter .label {
+.parameter .label {
   display: inline;
   margin-right: 10px;
   color: rgba(0, 0, 0, 0.65);
