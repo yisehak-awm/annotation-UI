@@ -27,18 +27,18 @@ const BiogridColumns = [
     dataIndex: "location",
     key: "location"
   },
+  // {
+  //   title: "Protiens",
+  //   name: "Protiens",
+  //   dataIndex: "protiens",
+  //   key: "protiens",
+  //   width: 200
+  // },
   {
-    title: "Protiens",
-    name: "Protiens",
-    dataIndex: "protiens",
-    key: "protiens",
-    width: 200
-  },
-  {
-    title: "Interacting genes",
-    name: "Interacting genes",
-    dataIndex: "interacting-genes",
-    key: "interacting-genes",
+    title: "Interacting features",
+    name: "Interacting features",
+    dataIndex: "interacting-features",
+    key: "interacting-features",
     width: 200
   },
   {
@@ -48,9 +48,10 @@ const BiogridColumns = [
     key: "pmid",
     render: text => (
       <Fragment>
+        {console.log(text)}
         {text
           .trim()
-          .split(",")
+          .split("\n")
           .map(t =>
             t.includes("http") ? (
               <a style={{ marginRight: 15 }} href={t} target="_blank">
@@ -277,11 +278,11 @@ function ResultTables(props) {
                         {protien.length > 0 && (
                           <a
                             href={`https://www.uniprot.org/uniprot/${protien[0].slice(
-                              protien.indexOf(":") + 1
+                              protien[0].indexOf(":") + 1
                             )}`}
                             style={{ marginRight: 15 }}
                           >
-                            {protien[0]}
+                            {protien[0].slice(protien[0].indexOf(":") + 1)}
                           </a>
                         )}
                         {protien.length > 1 && (
@@ -325,61 +326,55 @@ function ResultTables(props) {
     return (
       <Collapse>
         {pathways.map((p, i) => (
-          <Collapse.Panel header={p} key={p}>
-            <Typography.Paragraph>{table[1][i * 4 + 1]}</Typography.Paragraph>
-            <a href={`https://www.ncbi.nlm.nih.gov/gene/?term=${p}`}>
-              Learn more about {p}
-            </a>
+          <Collapse.Panel
+            header={p.includes("Uniprot") ? p.slice(p.indexOf(":") + 1) : p}
+            key={p}
+          >
+            <Typography.Paragraph>{table[1][i * 3 + 1]}</Typography.Paragraph>
+            {p.includes("Uniprot") ? (
+              <a
+                href={`https://www.uniprot.org/uniprot/${p.slice(
+                  p.indexOf(":") + 1
+                )}`}
+              >
+                Learn more about {p.slice(p.indexOf(":") + 1)}
+              </a>
+            ) : (
+              <a href={`https://www.ncbi.nlm.nih.gov/gene/?term=${p}`}>
+                Learn more about {p}
+              </a>
+            )}
             <Table
               columns={BiogridColumns}
               dataSource={tableData
                 .filter(row => {
-                  const values = row.slice(i * 4 + 1, i * 4 + 5);
+                  const values = row.slice(i * 3 + 1, i * 3 + 4);
                   return values[0] || values[1] || values[2] || values[3];
                 })
                 .map((row, j) => {
-                  const values = row.slice(i * 4 + 1, i * 4 + 5);
-                  const protien = values[1]
-                    .trim()
-                    .split(" ")
-                    .filter(s => s);
+                  const values = row.slice(i * 3 + 1, i * 3 + 4);
                   return {
                     key: `${p}-row-${j}`,
                     "serial-number": j + 1,
                     location: values[0] || "-",
-                    protiens: (
-                      <Fragment>
-                        {protien.length > 0 && (
-                          <a
-                            href={`https://www.uniprot.org/uniprot/${protien[0].slice(
-                              protien.indexOf(":") + 1
-                            )}`}
-                            style={{ marginRight: 15 }}
-                          >
-                            {protien[0]}
-                          </a>
-                        )}
-                        {protien.length > 1 && (
-                          <a
-                            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                              protien[1]
-                            }`}
-                          >
-                            {protien[1]}
-                          </a>
-                        )}
-                      </Fragment>
-                    ),
-                    "interacting-genes": (
+                    "interacting-features": values[1].includes("Uniprot") ? (
+                      <a
+                        href={`https://www.uniprot.org/uniprot/${values[1].slice(
+                          values[1].indexOf(":") + 1
+                        )}`}
+                      >
+                        {values[1].slice(values[1].indexOf(":") + 1)}
+                      </a>
+                    ) : (
                       <a
                         href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                          values[2]
+                          values[1]
                         }`}
                       >
-                        {values[2]}
+                        {values[1]}
                       </a>
                     ),
-                    pmid: values[3] || "-"
+                    pmid: values[2] || "-"
                   };
                 })}
               bordered
