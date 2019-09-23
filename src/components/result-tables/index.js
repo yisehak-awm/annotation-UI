@@ -411,7 +411,7 @@ function ResultTables(props) {
                   style={{ marginRight: 60 }}
                   size="small"
                   onClick={() =>
-                    downloadCSVFile(props.match.params.id, tables[tab].fileName)
+                    downloadCSVFile(props.id, tables[tab].fileName)
                   }
                 >
                   {`Download ${tables[tab].displayName} csv`}
