@@ -153,7 +153,7 @@ function AnnotationResult(props) {
                   .filter((a, i, self) => a && self.indexOf(a) === i)}
               />
             ) : (
-              <Redirect to={`/result/${props.match.params.id}`} />
+              <Redirect to={`/result/${id}`} />
             )
           }
         />
@@ -164,6 +164,7 @@ function AnnotationResult(props) {
           tables={response.csv_files}
           fetchTableData={fetchTableData}
           handleClose={() => setTableShown(false)}
+          id={id}
         />
       )}
     </div>
