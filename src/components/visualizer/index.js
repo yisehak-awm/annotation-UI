@@ -37,13 +37,13 @@ const AnnotationGroups = [
 
 const CYTOSCAPE_COLA_CONFIG = {
   name: "cola",
-  // fit: true,
+  fit: true,
   animate: true,
   padding: 10,
   nodeSpacing: 10,
   maxSimulationTime: 3000,
   ungrabifyWhileSimulating: true,
-  randomize: true,
+  randomize: false,
   avoidOverlap: true,
   handleDisconnected: true,
   infinite: false
@@ -174,11 +174,13 @@ function Visualizer(props) {
         contextMenu.showMenuItem("add");
         contextMenu.showMenuItem("remove");
         contextMenu.hideMenuItem("filter");
+        filteredElements.layout({ name: "concentric" }).run();
       } else {
         cy.batch(() => cy.elements().style({ opacity: 1 }));
         contextMenu.showMenuItem("filter");
         contextMenu.hideMenuItem("add");
         contextMenu.hideMenuItem("remove");
+        randomLayout();
       }
     },
     [filteredElements]
@@ -244,8 +246,16 @@ function Visualizer(props) {
     [layout]
   );
 
-  const randomLayout = () => {
-    setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
+  const randomLayout = (resetPositions = false) => {
+    if (resetPositions) {
+      const l = cy.layout({ name: "null" });
+      l.pon("layoutstop", function() {
+        setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
+      });
+      l.run();
+    } else {
+      setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
+    }
   };
 
   const breadthFirstLayout = () => {
@@ -364,6 +374,7 @@ function Visualizer(props) {
     cy.json({ elements: { nodes: visibleNodes } });
     cy.add(visibleEdges);
     randomLayout();
+    clearFilter();
     registerEventListeners();
   };
 
@@ -493,7 +504,7 @@ function Visualizer(props) {
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
         <Tooltip placement="right" title="Randomize layout">
-          <Button size="large" icon="swap" onClick={randomLayout} />
+          <Button size="large" icon="swap" onClick={() => randomLayout(true)} />
         </Tooltip>
         <Tooltip placement="right" title="Breadth-first layout">
           <Button size="large" icon="gold" onClick={breadthFirstLayout} />
