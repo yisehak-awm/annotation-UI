@@ -122,26 +122,25 @@ function AnnotationForm(props) {
           annotation.setFiltersList([
             ps,
             ip,
-            ism,
-            ...(annotations.includes("gene-go-annotation")
-              ? [namespace, nop]
-              : [])
+            ism
+            // ...(annotations.includes("gene-go-annotation")
+            //   ? [namespace, nop]
+            //   : [])
           ]);
         } else if (sa === "biogrid-interaction-annotation") {
           const int = new Filter();
           int.setFilter("interaction");
           int.setValue(includeProtiens ? "Proteins" : "Genes");
           annotation.setFiltersList([
-            int,
-            ...(annotations.includes("gene-go-annotation")
-              ? [namespace, nop]
-              : [])
+            int
+            // ...(annotations.includes("gene-go-annotation")
+            //   ? [namespace, nop]
+            //   : [])
           ]);
         }
         return annotation;
       })
     );
-    console.log("The request", annotationRequest);
 
     grpc.unary(Annotate.Annotate, {
       request: annotationRequest,
