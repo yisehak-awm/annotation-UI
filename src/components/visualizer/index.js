@@ -12,6 +12,8 @@ import {
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
 import filterSvg from "../../assets/filter.svg";
+import copySvg from "../../assets/copy.svg";
+
 import "cytoscape-context-menus/cytoscape-context-menus.css";
 import $ from "jquery";
 
@@ -249,6 +251,21 @@ function Visualizer(props) {
               image: { src: removeSvg, width: 18, height: 18, x: 8, y: 8 },
               onClickFunction: e => removeFromFilter(e.target.data().id),
               show: false
+            },
+            {
+              id: "copy",
+              content: "Copy ID",
+              selector: "node",
+              image: { src: copySvg, width: 18, height: 18, x: 8, y: 8 },
+              onClickFunction: e => {
+                const el = document.createElement("textarea");
+                el.value = e.target.data().id;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand("copy");
+                document.body.removeChild(el);
+              },
+              show: true
             }
           ],
           menuItemClasses: ["context-menu-item"],
