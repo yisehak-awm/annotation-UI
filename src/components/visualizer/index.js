@@ -1,5 +1,14 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Tooltip, Tree, message, Collapse, Button, Input } from "antd";
+import {
+  Tooltip,
+  Tree,
+  message,
+  Collapse,
+  Button,
+  Input,
+  Spin,
+  Typography
+} from "antd";
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
 import filterSvg from "../../assets/filter.svg";
@@ -47,6 +56,17 @@ const CYTOSCAPE_COLA_CONFIG = {
   avoidOverlap: true,
   handleDisconnected: true,
   infinite: false
+};
+
+const CYTOSCAPE_COSE_CONFIG = {
+  name: "cose",
+  randomize: false,
+  fit: true,
+  animate: true,
+  nodeRepulsion: 999999,
+  edgeElasticity: function(edge) {
+    return Math.min(edge.source().degree(), edge.target().degree()) * 10000;
+  }
 };
 
 const CYTOSCAPE_STYLE = [
@@ -117,6 +137,7 @@ function Visualizer(props) {
   const [layout, setLayout] = useState(undefined);
   const [filteredElements, setFilteredElements] = useState(undefined);
   const [contextMenu, setContextMenu] = useState(undefined);
+  const [loaderText, setLoaderText] = useState(undefined);
   const [nodeTypes, setNodeTypes] = useState(
     props.graph.nodes
       .map(n => n.data.subgroup)
@@ -241,7 +262,14 @@ function Visualizer(props) {
 
   useEffect(
     function() {
-      if (layout) layout.run();
+      if (layout) {
+        setLoaderText("Applying layout, please wait ...");
+        layout.pon("layoutstop", function() {
+          setLoaderText(undefined);
+          msg();
+        });
+        layout.run();
+      }
     },
     [layout]
   );
@@ -256,6 +284,10 @@ function Visualizer(props) {
     } else {
       setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
     }
+  };
+
+  const coseLayout = () => {
+    setLayout(cy.layout(CYTOSCAPE_COSE_CONFIG));
   };
 
   const breadthFirstLayout = () => {
@@ -499,12 +531,27 @@ function Visualizer(props) {
     );
   };
 
+  const renderLoader = () => {
+    return (
+      <div className="loader">
+        <div className="content">
+          <Spin style={{ marginRight: 15 }} />
+          <Typography.Text strong>{loaderText}</Typography.Text>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Fragment>
+      {loaderText && renderLoader()}
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
         <Tooltip placement="right" title="Randomize layout">
           <Button size="large" icon="swap" onClick={() => randomLayout(true)} />
+        </Tooltip>
+        <Tooltip placement="right" title="COSE layout">
+          <Button size="large" icon="star" onClick={() => coseLayout()} />
         </Tooltip>
         <Tooltip placement="right" title="Breadth-first layout">
           <Button size="large" icon="gold" onClick={breadthFirstLayout} />
