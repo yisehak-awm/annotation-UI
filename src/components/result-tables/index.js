@@ -27,13 +27,6 @@ const BiogridColumns = [
     dataIndex: "location",
     key: "location"
   },
-  // {
-  //   title: "Protiens",
-  //   name: "Protiens",
-  //   dataIndex: "protiens",
-  //   key: "protiens",
-  //   width: 200
-  // },
   {
     title: "Interacting features",
     name: "Interacting features",
@@ -66,87 +59,55 @@ const BiogridColumns = [
   }
 ];
 
-const PathwayColumns = [
-  {
-    title: "",
-    dataIndex: "serial-number",
-    render: (value, row, index) => {
-      const obj = {
-        children: value,
-        props: {}
-      };
-
-      return obj;
-    },
-    width: 200
-  },
-  { title: "Gene", name: "Gene", dataIndex: "gene", key: "gene", width: 200 },
-  {
-    title: "Protien",
-    name: "Protien",
-    dataIndex: "protien",
-    key: "protien",
-    width: 200
-  },
-  {
-    title: "Small molecule",
-    name: "Small molecule",
-    dataIndex: "small-molecule",
-    key: "small-molecule"
+function getPathwayColumns(numberOfColumns, cols) {
+  const columns = [
+    {
+      title: "",
+      dataIndex: "serial-number",
+      width: 200
+    }
+  ];
+  for (let i = 0; i < numberOfColumns; i++) {
+    columns.push({
+      title: cols[i],
+      name: cols[i],
+      dataIndex: `col${i}`,
+      key: `col${i}`
+    });
   }
-];
+  return columns;
+}
 
-const GOcolumns = [
-  {
-    title: "",
-    dataIndex: "serial-number",
-    render: (value, row, index) => {
-      const obj = {
-        children: value,
-        props: {}
-      };
-
-      return obj;
-    },
-    width: 200
-  },
-  {
-    title: "GO molecular function",
-    children: [
-      { title: "ID", name: "ID", dataIndex: "mf-id", key: "mf-id", width: 200 },
-      {
-        title: "Name",
-        name: "Name",
-        dataIndex: "mf-name",
-        key: "mf-name"
-      }
-    ]
-  },
-  {
-    title: "GO biological process",
-    children: [
-      { title: "ID", name: "ID", dataIndex: "bp-id", key: "bp-id", width: 200 },
-      {
-        title: "Name",
-        name: "Name",
-        dataIndex: "bp-name",
-        key: "bp-name"
-      }
-    ]
-  },
-  {
-    title: "GO cellular component",
-    children: [
-      { title: "ID", name: "ID", dataIndex: "cc-id", key: "cc-id", width: 200 },
-      {
-        title: "Name",
-        name: "Name",
-        dataIndex: "cc-name",
-        key: "cc-name"
-      }
-    ]
+function getGOColumns(numberOfColumns, cols) {
+  const columns = [
+    {
+      title: "",
+      dataIndex: "serial-number",
+      width: 200
+    }
+  ];
+  for (let i = 0; i < numberOfColumns; i = i + 2) {
+    columns.push({
+      title: cols[i],
+      children: [
+        {
+          title: "ID",
+          name: "ID",
+          dataIndex: `col${i}-id`,
+          key: `col${i}-id`,
+          width: 200
+        },
+        {
+          title: "Name",
+          name: "Name",
+          dataIndex: `col${i}-name`,
+          key: `col${i}-name`
+        }
+      ]
+    });
   }
-];
+  return columns;
+}
 
 function ResultTables(props) {
   const [tab, setTab] = useState(0);
@@ -161,36 +122,39 @@ function ResultTables(props) {
     const table = parseTable(data).data;
     const genes = table[0].slice(1).filter((g, i) => table[0].indexOf(g) === i);
     const tableData = table.slice(4);
+    const numberOfColumns = table[0].slice(1).length / genes.length;
+    const columns = getGOColumns(numberOfColumns, table[2].slice(1));
     return (
       <Collapse>
         {genes.map((g, i) => (
           <Collapse.Panel header={g} key={g}>
-            <Typography.Paragraph>{table[1][i * 6 + 1]}</Typography.Paragraph>
+            <Typography.Paragraph>
+              {table[1][i * numberOfColumns + 1]}
+            </Typography.Paragraph>
 
             <a href={`https://www.ncbi.nlm.nih.gov/gene/?term=${g}`}>
               Learn more about {g}
             </a>
             <Table
-              columns={GOcolumns}
+              columns={columns}
               dataSource={tableData
                 .filter(row => {
-                  const values = row.slice(i * 6 + 1, i * 6 + 7);
-                  return (
-                    values[0] ||
-                    values[1] ||
-                    values[2] ||
-                    values[3] ||
-                    values[4] ||
-                    values[5]
+                  const values = row.slice(
+                    i * numberOfColumns + 1,
+                    i * numberOfColumns + (numberOfColumns + 1)
                   );
+                  return values.some(v => v);
                 })
                 .map((row, j) => {
-                  const values = row.slice(i * 6 + 1, i * 6 + 7);
+                  const values = row.slice(
+                    i * numberOfColumns + 1,
+                    i * numberOfColumns + (numberOfColumns + 1)
+                  );
                   return {
                     key: `${g}-row-${j}`,
                     "serial-number": j + 1,
-                    "mf-name": values[0] || "-",
-                    "mf-id":
+                    "col0-name": values[0] || "-",
+                    "col0-id":
                       (
                         <a
                           href={`http://amigo.geneontology.org/amigo/term/${
@@ -200,8 +164,8 @@ function ResultTables(props) {
                           {values[1]}
                         </a>
                       ) || "-",
-                    "bp-name": values[2] || "-",
-                    "bp-id":
+                    "col2-name": values[2] || "-",
+                    "col2-id":
                       (
                         <a
                           href={`http://amigo.geneontology.org/amigo/term/${
@@ -211,8 +175,8 @@ function ResultTables(props) {
                           {values[3]}
                         </a>
                       ) || "-",
-                    "cc-name": values[4] || "-",
-                    "cc-id":
+                    "col4-name": values[4] || "-",
+                    "col4-id":
                       (
                         <a
                           href={`http://amigo.geneontology.org/amigo/term/${
@@ -240,23 +204,33 @@ function ResultTables(props) {
       .slice(1)
       .filter((g, i) => table[0].indexOf(g) === i);
     const tableData = table.slice(3);
+    const numberOfColumns = table[0].slice(1).length / pathways.length;
+    const columns = getPathwayColumns(numberOfColumns, table[2].slice(1));
     return (
       <Collapse>
         {pathways.map((p, i) => (
           <Collapse.Panel header={p} key={p}>
-            <Typography.Paragraph>{table[1][i * 3 + 1]}</Typography.Paragraph>
+            <Typography.Paragraph>
+              {table[1][i * numberOfColumns + 1]}
+            </Typography.Paragraph>
             <a href={` http://www.reactome.org/content/detail/${p}`}>
               Learn more about {p}
             </a>
             <Table
-              columns={PathwayColumns}
+              columns={columns}
               dataSource={tableData
                 .filter(row => {
-                  const values = row.slice(i * 3 + 1, i * 3 + 4);
-                  return values[0] || values[1] || values[2];
+                  const values = row.slice(
+                    i * numberOfColumns + 1,
+                    i * numberOfColumns + (numberOfColumns + 1)
+                  );
+                  return values.some(v => v);
                 })
                 .map((row, j) => {
-                  const values = row.slice(i * 3 + 1, i * 3 + 4);
+                  const values = row.slice(
+                    i * numberOfColumns + 1,
+                    i * numberOfColumns + (numberOfColumns + 1)
+                  );
                   const protien = values[1]
                     .trim()
                     .split(" ")
@@ -264,7 +238,7 @@ function ResultTables(props) {
                   return {
                     key: `${p}-row-${j}`,
                     "serial-number": j + 1,
-                    gene: (
+                    col0: (
                       <a
                         href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
                           values[0]
@@ -273,7 +247,7 @@ function ResultTables(props) {
                         {values[0]}
                       </a>
                     ),
-                    protien: (
+                    col1: (
                       <Fragment>
                         {protien.length > 0 && (
                           <a
@@ -296,7 +270,7 @@ function ResultTables(props) {
                         )}
                       </Fragment>
                     ),
-                    "small-molecule": (
+                    col2: (
                       <a
                         href={`https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${values[2].slice(
                           values[2].indexOf(":") + 1
