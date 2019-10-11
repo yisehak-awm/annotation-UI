@@ -1,15 +1,29 @@
 import React, { Fragment, useState, useEffect } from "react";
-import { Tooltip, Tree, message, Collapse, Button, Input } from "antd";
+import {
+  Tooltip,
+  Tree,
+  message,
+  Collapse,
+  Button,
+  Input,
+  Spin,
+  Typography
+} from "antd";
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
 import filterSvg from "../../assets/filter.svg";
+import copySvg from "../../assets/copy.svg";
+
 import "cytoscape-context-menus/cytoscape-context-menus.css";
+import "cytoscape-navigator/cytoscape.js-navigator.css";
 import $ from "jquery";
 
+const Color = require("color");
 const cytoscape = require("cytoscape");
 const cola = require("cytoscape-cola");
 const contextMenus = require("cytoscape-context-menus");
-const Color = require("color");
+var navigator = require("cytoscape-navigator");
+navigator(cytoscape);
 contextMenus(cytoscape, $);
 
 import "./style.css";
@@ -35,6 +49,16 @@ const AnnotationGroups = [
   }
 ];
 
+var NAVIGATOR_CONFIG = {
+  container: "#navigator-wrapper",
+  viewLiveFramerate: 0,
+  thumbnailEventFramerate: 30,
+  thumbnailLiveFramerate: false,
+  dblClickDelay: 200,
+  removeCustomContainer: true,
+  rerenderDelay: 100
+};
+
 const CYTOSCAPE_COLA_CONFIG = {
   name: "cola",
   fit: true,
@@ -47,6 +71,17 @@ const CYTOSCAPE_COLA_CONFIG = {
   avoidOverlap: true,
   handleDisconnected: true,
   infinite: false
+};
+
+const CYTOSCAPE_COSE_CONFIG = {
+  name: "cose",
+  randomize: false,
+  fit: true,
+  animate: true,
+  nodeRepulsion: 999999,
+  edgeElasticity: function(edge) {
+    return Math.min(edge.source().degree(), edge.target().degree()) * 10000;
+  }
 };
 
 const CYTOSCAPE_STYLE = [
@@ -117,6 +152,7 @@ function Visualizer(props) {
   const [layout, setLayout] = useState(undefined);
   const [filteredElements, setFilteredElements] = useState(undefined);
   const [contextMenu, setContextMenu] = useState(undefined);
+  const [loaderText, setLoaderText] = useState(undefined);
   const [nodeTypes, setNodeTypes] = useState(
     props.graph.nodes
       .map(n => n.data.subgroup)
@@ -131,7 +167,11 @@ function Visualizer(props) {
     "Uniprot",
     "ChEBI"
   ]);
-  const [visibleAnnotations, setVisibleAnnotations] = useState(["main%"]);
+  const [visibleAnnotations, setVisibleAnnotations] = useState([
+    "main%",
+    "gene-pathway-annotation%",
+    "biogrid-interaction-annotation%"
+  ]);
   const [selectedNode, setSelectedNode] = useState({
     node: null,
     position: null
@@ -139,6 +179,19 @@ function Visualizer(props) {
   const [selectedEdge, setSelectedEdge] = useState({
     pubmed: null
   });
+  const [MLLPositions, setMLLPositions] = useState(undefined);
+  // Save MLL positions
+  !MLLPositions &&
+    setMLLPositions(
+      JSON.parse(JSON.stringify(props.graph.nodes)).reduce(function(
+        prevVal,
+        n,
+        i
+      ) {
+        return { ...prevVal, [n.data.id]: n.position };
+      },
+      {})
+    );
 
   useEffect(function() {
     setCy(
@@ -201,6 +254,7 @@ function Visualizer(props) {
             }
           }
         ]);
+        var nav = cy.navigator(NAVIGATOR_CONFIG);
         var options = {
           menuItems: [
             {
@@ -228,6 +282,21 @@ function Visualizer(props) {
               image: { src: removeSvg, width: 18, height: 18, x: 8, y: 8 },
               onClickFunction: e => removeFromFilter(e.target.data().id),
               show: false
+            },
+            {
+              id: "copy",
+              content: "Copy ID",
+              selector: "node",
+              image: { src: copySvg, width: 18, height: 18, x: 8, y: 8 },
+              onClickFunction: e => {
+                const el = document.createElement("textarea");
+                el.value = e.target.data().id;
+                document.body.appendChild(el);
+                el.select();
+                document.execCommand("copy");
+                document.body.removeChild(el);
+              },
+              show: true
             }
           ],
           menuItemClasses: ["context-menu-item"],
@@ -241,7 +310,14 @@ function Visualizer(props) {
 
   useEffect(
     function() {
-      if (layout) layout.run();
+      if (layout) {
+        console.log("asd", layout);
+        setLoaderText("Applying layout, please wait ...");
+        layout.pon("layoutstop", function() {
+          setLoaderText(undefined);
+        });
+        layout.run();
+      }
     },
     [layout]
   );
@@ -256,6 +332,13 @@ function Visualizer(props) {
     } else {
       setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
     }
+  };
+
+  const coseLayout = () => {
+    cy.nodes().positions(function(n) {
+      return MLLPositions[n.id()];
+    });
+    setLayout(cy.layout({ name: "preset" }));
   };
 
   const breadthFirstLayout = () => {
@@ -373,7 +456,7 @@ function Visualizer(props) {
     });
     cy.json({ elements: { nodes: visibleNodes } });
     cy.add(visibleEdges);
-    randomLayout();
+    setLayout(cy.layout({ name: "preset" }));
     clearFilter();
     registerEventListeners();
   };
@@ -499,12 +582,28 @@ function Visualizer(props) {
     );
   };
 
+  const renderLoader = () => {
+    return (
+      <div className="loader">
+        <div className="content">
+          <Spin style={{ marginRight: 15 }} />
+          <Typography.Text strong>{loaderText}</Typography.Text>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <Fragment>
+      {loaderText && renderLoader()}
+      <div id="navigator-wrapper"></div>
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
         <Tooltip placement="right" title="Randomize layout">
           <Button size="large" icon="swap" onClick={() => randomLayout(true)} />
+        </Tooltip>
+        <Tooltip placement="right" title="COSE layout">
+          <Button size="large" icon="star" onClick={() => coseLayout()} />
         </Tooltip>
         <Tooltip placement="right" title="Breadth-first layout">
           <Button size="large" icon="gold" onClick={breadthFirstLayout} />
@@ -562,7 +661,7 @@ function Visualizer(props) {
           <Collapse.Panel header="Annotations" key="annotation">
             <Tree
               defaultExpandAll
-              defaultCheckedKeys={[]}
+              defaultCheckedKeys={visibleAnnotations}
               onCheck={setVisibleAnnotations}
               checkable
             >
