@@ -90,7 +90,7 @@ function AnnotationResult(props) {
   );
 
   const renderComplete = () => {
-    const { nodes, edges } = response.result;
+    const { nodes, edges } = response.result.elements;
     return (
       <Fragment>
         <p>
@@ -144,8 +144,8 @@ function AnnotationResult(props) {
           render={() =>
             response && response.result ? (
               <Visualizer
-                graph={response.result}
-                annotations={response.result.nodes
+                graph={{ ...response.result.elements }}
+                annotations={response.result.elements.nodes
                   .reduce(
                     (acc, n) => [...acc, ...n.data.group, n.data.subgroup],
                     []
