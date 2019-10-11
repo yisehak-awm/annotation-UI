@@ -167,7 +167,11 @@ function Visualizer(props) {
     "Uniprot",
     "ChEBI"
   ]);
-  const [visibleAnnotations, setVisibleAnnotations] = useState(["main%"]);
+  const [visibleAnnotations, setVisibleAnnotations] = useState([
+    "main%",
+    "gene-pathway-annotation%",
+    "biogrid-interaction-annotation%"
+  ]);
   const [selectedNode, setSelectedNode] = useState({
     node: null,
     position: null
@@ -175,6 +179,19 @@ function Visualizer(props) {
   const [selectedEdge, setSelectedEdge] = useState({
     pubmed: null
   });
+  const [MLLPositions, setMLLPositions] = useState(undefined);
+  // Save MLL positions
+  !MLLPositions &&
+    setMLLPositions(
+      JSON.parse(JSON.stringify(props.graph.nodes)).reduce(function(
+        prevVal,
+        n,
+        i
+      ) {
+        return { ...prevVal, [n.data.id]: n.position };
+      },
+      {})
+    );
 
   useEffect(function() {
     setCy(
@@ -294,10 +311,10 @@ function Visualizer(props) {
   useEffect(
     function() {
       if (layout) {
+        console.log("asd", layout);
         setLoaderText("Applying layout, please wait ...");
         layout.pon("layoutstop", function() {
           setLoaderText(undefined);
-          msg();
         });
         layout.run();
       }
@@ -318,7 +335,10 @@ function Visualizer(props) {
   };
 
   const coseLayout = () => {
-    setLayout(cy.layout(CYTOSCAPE_COSE_CONFIG));
+    cy.nodes().positions(function(n) {
+      return MLLPositions[n.id()];
+    });
+    setLayout(cy.layout({ name: "preset" }));
   };
 
   const breadthFirstLayout = () => {
@@ -436,7 +456,7 @@ function Visualizer(props) {
     });
     cy.json({ elements: { nodes: visibleNodes } });
     cy.add(visibleEdges);
-    randomLayout();
+    setLayout(cy.layout({ name: "preset" }));
     clearFilter();
     registerEventListeners();
   };
@@ -641,7 +661,7 @@ function Visualizer(props) {
           <Collapse.Panel header="Annotations" key="annotation">
             <Tree
               defaultExpandAll
-              defaultCheckedKeys={[]}
+              defaultCheckedKeys={visibleAnnotations}
               onCheck={setVisibleAnnotations}
               checkable
             >

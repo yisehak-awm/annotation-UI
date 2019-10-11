@@ -110,7 +110,7 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background-color: rgba(176, 204, 248, 0.7);
+  background-color: rgba(126, 146, 179, 0.5);
   z-index: 999;
 }
 
@@ -124,10 +124,10 @@
   width: 300px;
   height: 500px;
   position: fixed;
-  right: 15px;
+  left: 5px;
   bottom: 15px;
   z-index: 99;
-  background-color: #fff;
+  background-color: #ffffffaa;
   border-radius: 5px;
 }
 
@@ -138,4 +138,10 @@
 
 #navigator-wrapper .cytoscape-navigatorOverlay {
   z-index: 999;
+}
+
+.cytoscape-navigatorView {
+  background-color: #809fbf;
+  border: solid 2px #02284eda;
+  opacity: 0.2;
 }
