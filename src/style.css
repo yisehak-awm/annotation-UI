@@ -6,3 +6,10 @@ img.empty-state {
   width: 30%;
   margin-top: 45px;
 }
+
+body {
+  background-image: url("./assets/bg.svg");
+  background-attachment: fixed;
+  background-size: 100%;
+  padding-bottom: 100px;
+}
