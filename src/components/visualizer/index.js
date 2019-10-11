@@ -15,15 +15,15 @@ import filterSvg from "../../assets/filter.svg";
 import copySvg from "../../assets/copy.svg";
 
 import "cytoscape-context-menus/cytoscape-context-menus.css";
-import "cytoscape-navigator/cytoscape.js-navigator.css";
+// import "cytoscape-navigator/cytoscape.js-navigator.css";
 import $ from "jquery";
 
 const Color = require("color");
 const cytoscape = require("cytoscape");
 const cola = require("cytoscape-cola");
 const contextMenus = require("cytoscape-context-menus");
-var navigator = require("cytoscape-navigator");
-navigator(cytoscape);
+// var navigator = require("cytoscape-navigator");
+// navigator(cytoscape);
 contextMenus(cytoscape, $);
 
 import "./style.css";
@@ -254,7 +254,7 @@ function Visualizer(props) {
             }
           }
         ]);
-        var nav = cy.navigator(NAVIGATOR_CONFIG);
+        // var nav = cy.navigator(NAVIGATOR_CONFIG);
         var options = {
           menuItems: [
             {
@@ -311,7 +311,6 @@ function Visualizer(props) {
   useEffect(
     function() {
       if (layout) {
-        console.log("asd", layout);
         setLoaderText("Applying layout, please wait ...");
         layout.pon("layoutstop", function() {
           setLoaderText(undefined);
@@ -596,7 +595,7 @@ function Visualizer(props) {
   return (
     <Fragment>
       {loaderText && renderLoader()}
-      <div id="navigator-wrapper"></div>
+      {/* <div id="navigator-wrapper"></div> */}
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
         <Tooltip placement="right" title="Randomize layout">
