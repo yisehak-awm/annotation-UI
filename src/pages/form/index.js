@@ -108,7 +108,7 @@ function AnnotationForm(props) {
     namespace.setValue(GOSubgroups.join(" "));
     const nop = new Filter();
     nop.setFilter("parents");
-    nop.setValue(parents);
+    nop.setValue(parents.toString());
     annotationRequest.setAnnotationsList(
       annotations.map(sa => {
         const annotation = new Annotation();
@@ -126,8 +126,8 @@ function AnnotationForm(props) {
           ip.setFilter("include_prot");
           ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
           const capb = new Filter();
-          ip.setFilter("biogrid");
-          ip.setValue(annotatePathwayWithBiogrid ? 1 : 0);
+          capb.setFilter("biogrid");
+          capb.setValue(annotatePathwayWithBiogrid ? "1" : "0");
           annotation.setFiltersList([
             ps,
             ip,
@@ -155,7 +155,6 @@ function AnnotationForm(props) {
         setLoading(false);
         if (status === grpc.Code.OK) {
           setResponse(msg.array[0]);
-          console.log(msg.array[0]);
           props.history.push({
             pathname: `/result/${msg.array[0].substr(
               msg.array[0].indexOf("id=") + 3
