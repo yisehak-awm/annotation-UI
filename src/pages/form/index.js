@@ -49,8 +49,11 @@ function AnnotationForm(props) {
   const [pathways, setPathways] = useState(["reactome"]);
   const [includeSmallMolecules, setIncludeSmallMolecules] = useState(false);
   const [includeProtiens, setIncludeProtiens] = useState(true);
-  const [annotateBiogridWithGO, setAnnotateBiogridWithGO] = useState(false);
-  const [annotatePathwayWithGO, setAnnotatePathwayWithGO] = useState(false);
+  // const [annotateBiogridWithGO, setAnnotateBiogridWithGO] = useState(false);
+  // const [annotatePathwayWithGO, setAnnotatePathwayWithGO] = useState(false);
+  const [annotatePathwayWithBiogrid, setAnnotatePathwayWithBiogrid] = useState(
+    false
+  );
   const [response, setResponse] = useState(undefined);
   const [loading, setLoading] = useState(false);
   const [GOSubgroups, setGOSubgroups] = useState([
@@ -122,19 +125,23 @@ function AnnotationForm(props) {
           const ip = new Filter();
           ip.setFilter("include_prot");
           ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
+          const capb = new Filter();
+          ip.setFilter("biogrid");
+          ip.setValue(annotatePathwayWithBiogrid ? 1 : 0);
           annotation.setFiltersList([
             ps,
             ip,
             ism,
-            ...(annotatePathwayWithGO ? [namespace, nop] : [])
+            capb
+            // ...(annotatePathwayWithGO ? [namespace, nop] : [])
           ]);
         } else if (sa === "biogrid-interaction-annotation") {
           const int = new Filter();
           int.setFilter("interaction");
           int.setValue(includeProtiens ? "Proteins" : "Genes");
           annotation.setFiltersList([
-            int,
-            ...(annotateBiogridWithGO ? [namespace, nop] : [])
+            int
+            // ...(annotateBiogridWithGO ? [namespace, nop] : [])
           ]);
         }
         return annotation;
@@ -301,12 +308,20 @@ function AnnotationForm(props) {
                   </div>
                   <div className="parameter">
                     <Switch
+                      defaultChecked={annotatePathwayWithBiogrid}
+                      onChange={setAnnotatePathwayWithBiogrid}
+                    />
+                    {"  "}
+                    <div className="label">Cross annotate with biogrid</div>
+                  </div>
+                  {/* <div className="parameter">
+                    <Switch
                       defaultChecked={annotatePathwayWithGO}
                       onChange={setAnnotatePathwayWithGO}
                     />
                     {"  "}
                     <div className="label">Cross annotate with GO</div>
-                  </div>
+                  </div> */}
                 </div>
               )}
             </li>
@@ -318,7 +333,7 @@ function AnnotationForm(props) {
               >
                 Biogrid Protien Interaction
               </Checkbox>
-              {annotations.includes("biogrid-interaction-annotation") && (
+              {/* {annotations.includes("biogrid-interaction-annotation") && (
                 <div className="annotation-parameters">
                   <div className="parameter">
                     <Switch
@@ -329,7 +344,7 @@ function AnnotationForm(props) {
                     <div className="label">Cross annotate with GO</div>
                   </div>
                 </div>
-              )}
+              )} */}
             </li>
           </ul>
           <div className="parameter" style={{ marginTop: 45 }}>
@@ -340,12 +355,14 @@ function AnnotationForm(props) {
             {"  "}
             <div className="label">Include protiens</div>
           </div>
-          <Alert
-            type="warning"
-            message="Cross annotation will increase the size"
-            description="If the result is too large, you might have difficulties visualizing it."
-            showIcon
-          ></Alert>
+          {annotatePathwayWithBiogrid && (
+            <Alert
+              type="warning"
+              message="Cross annotation will increase the size"
+              description="If the result is too large, you might have difficulties visualizing it."
+              showIcon
+            ></Alert>
+          )}
           <div className="actions">
             <Button
               type="primary"
