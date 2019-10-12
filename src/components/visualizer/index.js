@@ -169,6 +169,7 @@ function Visualizer(props) {
   ]);
   const [visibleAnnotations, setVisibleAnnotations] = useState([
     "main%",
+    "gene-go-annotation%",
     "gene-pathway-annotation%",
     "biogrid-interaction-annotation%"
   ]);
@@ -233,7 +234,7 @@ function Visualizer(props) {
         contextMenu.showMenuItem("filter");
         contextMenu.hideMenuItem("add");
         contextMenu.hideMenuItem("remove");
-        randomLayout();
+        layout.run();
       }
     },
     [filteredElements]
@@ -334,10 +335,14 @@ function Visualizer(props) {
   };
 
   const coseLayout = () => {
-    cy.nodes().positions(function(n) {
-      return MLLPositions[n.id()];
-    });
-    setLayout(cy.layout({ name: "preset" }));
+    setLayout(
+      cy.layout({
+        name: "preset",
+        positions: function(n) {
+          return MLLPositions[n.id()];
+        }
+      })
+    );
   };
 
   const breadthFirstLayout = () => {
@@ -601,7 +606,7 @@ function Visualizer(props) {
         <Tooltip placement="right" title="Randomize layout">
           <Button size="large" icon="swap" onClick={() => randomLayout(true)} />
         </Tooltip>
-        <Tooltip placement="right" title="COSE layout">
+        <Tooltip placement="right" title="Multi-level layout">
           <Button size="large" icon="star" onClick={() => coseLayout()} />
         </Tooltip>
         <Tooltip placement="right" title="Breadth-first layout">
@@ -629,7 +634,6 @@ function Visualizer(props) {
                 You may download the graph JSON and view it on Cytoscape
                 desktop.
               </p>
-              <p>The search is case sensitive.</p>
             </div>
           }
         >
