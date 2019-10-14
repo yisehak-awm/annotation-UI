@@ -10,6 +10,6 @@ img.empty-state {
 body {
   background-image: url("./assets/bg.svg");
   background-attachment: fixed;
-  background-size: 100%;
+  background-size: cover;
   padding-bottom: 100px;
 }
