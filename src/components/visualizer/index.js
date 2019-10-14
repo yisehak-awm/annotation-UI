@@ -243,6 +243,7 @@ function Visualizer(props) {
   useEffect(
     function() {
       if (cy) {
+        coseLayout();
         cy.style([
           ...CYTOSCAPE_STYLE,
           ...assignColorToAnnotations(),
