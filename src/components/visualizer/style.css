@@ -54,18 +54,6 @@
   overflow-y: scroll;
 }
 
-.annotation-toggle-wrapper {
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  background-color: #fff;
-  border-radius: 5px;
-  z-index: 2;
-  opacity: 0.9;
-  text-align: left;
-  width: 300px;
-}
-
 .visualizer-wrapper {
   width: 100vw;
   height: 100vh;

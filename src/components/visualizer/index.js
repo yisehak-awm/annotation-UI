@@ -7,7 +7,9 @@ import {
   Button,
   Input,
   Spin,
-  Typography
+  Typography,
+  Drawer,
+  Icon
 } from "antd";
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
@@ -15,15 +17,12 @@ import filterSvg from "../../assets/filter.svg";
 import copySvg from "../../assets/copy.svg";
 
 import "cytoscape-context-menus/cytoscape-context-menus.css";
-// import "cytoscape-navigator/cytoscape.js-navigator.css";
 import $ from "jquery";
 
 const Color = require("color");
 const cytoscape = require("cytoscape");
 const cola = require("cytoscape-cola");
 const contextMenus = require("cytoscape-context-menus");
-// var navigator = require("cytoscape-navigator");
-// navigator(cytoscape);
 contextMenus(cytoscape, $);
 
 import "./style.css";
@@ -49,16 +48,6 @@ const AnnotationGroups = [
   }
 ];
 
-var NAVIGATOR_CONFIG = {
-  container: "#navigator-wrapper",
-  viewLiveFramerate: 0,
-  thumbnailEventFramerate: 30,
-  thumbnailLiveFramerate: false,
-  dblClickDelay: 200,
-  removeCustomContainer: true,
-  rerenderDelay: 100
-};
-
 const CYTOSCAPE_COLA_CONFIG = {
   name: "cola",
   fit: true,
@@ -67,21 +56,10 @@ const CYTOSCAPE_COLA_CONFIG = {
   nodeSpacing: 10,
   maxSimulationTime: 3000,
   ungrabifyWhileSimulating: true,
-  randomize: false,
+  randomize: true,
   avoidOverlap: true,
   handleDisconnected: true,
   infinite: false
-};
-
-const CYTOSCAPE_COSE_CONFIG = {
-  name: "cose",
-  randomize: false,
-  fit: true,
-  animate: true,
-  nodeRepulsion: 999999,
-  edgeElasticity: function(edge) {
-    return Math.min(edge.source().degree(), edge.target().degree()) * 10000;
-  }
 };
 
 const CYTOSCAPE_STYLE = [
@@ -153,6 +131,7 @@ function Visualizer(props) {
   const [filteredElements, setFilteredElements] = useState(undefined);
   const [contextMenu, setContextMenu] = useState(undefined);
   const [loaderText, setLoaderText] = useState(undefined);
+  const [isDrawerOpen, setDrawerOpen] = useState(true);
   const [nodeTypes, setNodeTypes] = useState(
     props.graph.nodes
       .map(n => n.data.subgroup)
@@ -162,11 +141,15 @@ function Visualizer(props) {
         );
       })
   );
-  const [visibleNodeTypes, setVisibleNodeTypes] = useState([
-    "Genes",
-    "Uniprot",
-    "ChEBI"
-  ]);
+  const [linkTypes, setLinkTypes] = useState(
+    props.graph.edges
+      .map(e => e.data.subgroup)
+      .filter((s, i, arr) => {
+        return arr.indexOf(s) === i;
+      })
+  );
+  const [visibleNodeTypes, setVisibleNodeTypes] = useState(nodeTypes);
+  const [visibleLinkTypes, setVisibleLinkTypes] = useState(linkTypes);
   const [visibleAnnotations, setVisibleAnnotations] = useState([
     "main%",
     "gene-go-annotation%",
@@ -208,7 +191,7 @@ function Visualizer(props) {
     function() {
       cy && toggleAnnotationVisibility(visibleAnnotations);
     },
-    [visibleAnnotations, visibleNodeTypes, cy]
+    [visibleAnnotations, visibleNodeTypes, visibleLinkTypes, cy]
   );
 
   useEffect(
@@ -228,13 +211,13 @@ function Visualizer(props) {
         contextMenu.showMenuItem("add");
         contextMenu.showMenuItem("remove");
         contextMenu.hideMenuItem("filter");
-        filteredElements.layout({ name: "concentric" }).run();
+        filteredElements.layout(layout).run();
       } else {
         cy.batch(() => cy.elements().style({ opacity: 1 }));
         contextMenu.showMenuItem("filter");
         contextMenu.hideMenuItem("add");
         contextMenu.hideMenuItem("remove");
-        layout.run();
+        cy.layout(layout).run();
       }
     },
     [filteredElements]
@@ -243,6 +226,7 @@ function Visualizer(props) {
   useEffect(
     function() {
       if (cy) {
+        coseLayout();
         cy.style([
           ...CYTOSCAPE_STYLE,
           ...assignColorToAnnotations(),
@@ -312,51 +296,42 @@ function Visualizer(props) {
   useEffect(
     function() {
       if (layout) {
+        const l = filteredElements
+          ? filteredElements.layout(layout)
+          : cy.layout(layout);
         setLoaderText("Applying layout, please wait ...");
-        layout.pon("layoutstop", function() {
+        l.pon("layoutstop", function() {
           setLoaderText(undefined);
         });
-        layout.run();
+        l.run();
       }
     },
     [layout]
   );
 
-  const randomLayout = (resetPositions = false) => {
-    if (resetPositions) {
-      const l = cy.layout({ name: "null" });
-      l.pon("layoutstop", function() {
-        setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
-      });
-      l.run();
-    } else {
-      setLayout(cy.layout(CYTOSCAPE_COLA_CONFIG));
-    }
+  const randomLayout = () => {
+    setLayout(CYTOSCAPE_COLA_CONFIG);
   };
 
   const coseLayout = () => {
-    setLayout(
-      cy.layout({
-        name: "preset",
-        positions: function(n) {
-          return MLLPositions[n.id()];
-        }
-      })
-    );
+    setLayout({
+      name: "preset",
+      positions: function(n) {
+        return MLLPositions[n.id()];
+      }
+    });
   };
 
   const breadthFirstLayout = () => {
-    setLayout(cy.layout({ name: "breadthfirst" }));
+    setLayout({ name: "breadthfirst" });
   };
 
   const concentricLayout = () => {
-    setLayout(
-      cy.layout({
-        name: "concentric",
-        concentric: node => node.degree(),
-        levelWidth: () => 3
-      })
-    );
+    setLayout({
+      name: "concentric",
+      concentric: node => node.degree(),
+      levelWidth: () => 3
+    });
   };
 
   const takeScreenshot = () => {
@@ -452,15 +427,15 @@ function Visualizer(props) {
       );
     });
     const visibleEdges = edges.filter(e => {
-      const { source, target } = e.data;
+      const { source, target, subgroup } = e.data;
       return (
         visibleNodes.some(n => n.data.id === source) &&
-        visibleNodes.some(n => n.data.id === target)
+        visibleNodes.some(n => n.data.id === target) &&
+        visibleLinkTypes.some(s => s === subgroup)
       );
     });
     cy.json({ elements: { nodes: visibleNodes } });
     cy.add(visibleEdges);
-    setLayout(cy.layout({ name: "preset" }));
     clearFilter();
     registerEventListeners();
   };
@@ -599,15 +574,118 @@ function Visualizer(props) {
 
   return (
     <Fragment>
+      <Drawer
+        title="Apply filters"
+        placement="right"
+        closable={false}
+        onClose={() => setDrawerOpen(false)}
+        visible={isDrawerOpen}
+        width={360}
+      >
+        <Button
+          size="large"
+          type="primary"
+          style={{
+            position: "absolute",
+            right: 360,
+            borderTopRightRadius: 0,
+            borderBottomRightRadius: 0,
+            boxShadow: "-2px 0 8px rgba(0,0,0,.15)"
+          }}
+          onClick={() => setDrawerOpen(true)}
+        >
+          <Icon type="filter" theme={isDrawerOpen ? "filled" : null} />
+        </Button>
+        <div className="annotation-toggle-wrapper">
+          <Input.Search
+            placeholder="Node ID"
+            onSearch={search}
+            enterButton
+            style={{ margin: 5, marginBottom: 15 }}
+          />
+          <Collapse bordered={false} defaultActiveKey={["types"]}>
+            <Collapse.Panel header="Node types" key="types">
+              <Tree
+                defaultCheckedKeys={nodeTypes}
+                onCheck={setVisibleNodeTypes}
+                checkable
+              >
+                {nodeTypes.map(n => (
+                  <Tree.TreeNode key={n} title={n} />
+                ))}
+              </Tree>
+            </Collapse.Panel>
+          </Collapse>
+          <Collapse bordered={false} defaultActiveKey={["types"]}>
+            <Collapse.Panel header="Link types" key="types">
+              <Tree
+                defaultCheckedKeys={linkTypes}
+                onCheck={setVisibleLinkTypes}
+                checkable
+              >
+                {linkTypes.map(n => (
+                  <Tree.TreeNode key={n} title={n} />
+                ))}
+              </Tree>
+            </Collapse.Panel>
+          </Collapse>
+          <Collapse bordered={false} defaultActiveKey={["annotation"]}>
+            <Collapse.Panel header="Annotations" key="annotation">
+              <Tree
+                defaultExpandAll
+                defaultCheckedKeys={visibleAnnotations}
+                onCheck={setVisibleAnnotations}
+                checkable
+              >
+                {AnnotationGroups.filter(a =>
+                  props.annotations.includes(a.group)
+                ).map((a, i) => {
+                  return (
+                    <Tree.TreeNode
+                      key={`${a.group}%`}
+                      title={
+                        <span>
+                          {a.group}
+                          {renderProgressBar(
+                            getAnnotationPercentage(a.group),
+                            a.color || "#565656"
+                          )}
+                        </span>
+                      }
+                    >
+                      {a.subgroups
+                        .filter(s => props.annotations.includes(s.subgroup))
+                        .map(s => (
+                          <Tree.TreeNode
+                            key={`${a.group}%${s.subgroup}`}
+                            title={
+                              <span>
+                                {s.subgroup}
+                                {renderProgressBar(
+                                  getAnnotationPercentage(a.group, s.subgroup),
+                                  a.color || s.color
+                                )}
+                              </span>
+                            }
+                          />
+                        ))}
+                    </Tree.TreeNode>
+                  );
+                })}
+              </Tree>
+            </Collapse.Panel>
+          </Collapse>
+        </div>
+      </Drawer>
       {loaderText && renderLoader()}
       {/* <div id="navigator-wrapper"></div> */}
       <div className="visualizer-wrapper" ref={cy_wrapper} />
       <div className="visualizer-controls-wrapper">
         <Tooltip placement="right" title="Randomize layout">
-          <Button size="large" icon="swap" onClick={() => randomLayout(true)} />
+          <Button size="large" icon="swap" onClick={randomLayout} />
         </Tooltip>
         <Tooltip placement="right" title="Multi-level layout">
-          <Button size="large" icon="star" onClick={() => coseLayout()} />
+          <Button size="large" icon="star" onClick={coseLayout} />
         </Tooltip>
         <Tooltip placement="right" title="Breadth-first layout">
           <Button size="large" icon="gold" onClick={breadthFirstLayout} />
@@ -640,73 +718,7 @@ function Visualizer(props) {
           <Button size="large" icon="info-circle" />
         </Tooltip>
       </div>
-      <div className="annotation-toggle-wrapper">
-        <Input.Search
-          placeholder="Node ID"
-          onSearch={search}
-          enterButton
-          style={{ margin: 5, marginBottom: 15 }}
-        />
-        <Collapse bordered={false} defaultActiveKey={["types"]}>
-          <Collapse.Panel header="Node types" key="types">
-            <Tree
-              defaultCheckedKeys={nodeTypes}
-              onCheck={setVisibleNodeTypes}
-              checkable
-            >
-              {nodeTypes.map(n => (
-                <Tree.TreeNode key={n} title={n} />
-              ))}
-            </Tree>
-          </Collapse.Panel>
-        </Collapse>
-        <Collapse bordered={false} defaultActiveKey={["annotation"]}>
-          <Collapse.Panel header="Annotations" key="annotation">
-            <Tree
-              defaultExpandAll
-              defaultCheckedKeys={visibleAnnotations}
-              onCheck={setVisibleAnnotations}
-              checkable
-            >
-              {AnnotationGroups.filter(a =>
-                props.annotations.includes(a.group)
-              ).map((a, i) => {
-                return (
-                  <Tree.TreeNode
-                    key={`${a.group}%`}
-                    title={
-                      <span>
-                        {a.group}
-                        {renderProgressBar(
-                          getAnnotationPercentage(a.group),
-                          a.color || "#565656"
-                        )}
-                      </span>
-                    }
-                  >
-                    {a.subgroups
-                      .filter(s => props.annotations.includes(s.subgroup))
-                      .map(s => (
-                        <Tree.TreeNode
-                          key={`${a.group}%${s.subgroup}`}
-                          title={
-                            <span>
-                              {s.subgroup}
-                              {renderProgressBar(
-                                getAnnotationPercentage(a.group, s.subgroup),
-                                a.color || s.color
-                              )}
-                            </span>
-                          }
-                        />
-                      ))}
-                  </Tree.TreeNode>
-                );
-              })}
-            </Tree>
-          </Collapse.Panel>
-        </Collapse>
-      </div>
+
       {selectedNode.node &&
         renderDescriptionBox(
           `${selectedNode.node.name} ( ${selectedNode.node.id.slice(
