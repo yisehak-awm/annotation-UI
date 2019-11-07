@@ -36,7 +36,14 @@ const GeneGoOptions = [
 
 const Pathways = [
   { label: "SMPDB", value: "smpdb" },
-  { label: "Reactome", value: "reactome" }
+  {
+    label: (
+      <a href="http://www.reactome.org" target="_blank">
+        Reactome
+      </a>
+    ),
+    value: "reactome"
+  }
 ];
 
 const GeneInputMethods = { Manual: "manual", Import: "import" };
@@ -197,7 +204,13 @@ function AnnotationForm(props) {
           md={{ span: 10, offset: 7 }}
         >
           {/* Gene List */}
-          <span className="title">Input Genes</span>
+          <span className="title">
+            Input{" "}
+            <a href="http://www.genenames.org" target="_blank">
+              HGNC
+            </a>{" "}
+            Gene Symbols
+          </span>
           <Tabs activeKey={geneInputMethod} onChange={setGeneInputMethod}>
             <Tabs.TabPane tab="Input directly" key={GeneInputMethods.Manual}>
               <Input
@@ -258,7 +271,9 @@ function AnnotationForm(props) {
               <Checkbox
                 onChange={e => toggleAnnotation("gene-go-annotation", e)}
               >
-                Gene-GO
+                <a href="http://www.geneontology.org" target="_blank">
+                  Gene Ontology
+                </a>
               </Checkbox>
               {annotations.includes("gene-go-annotation") && (
                 <div className="annotation-parameters">
@@ -286,7 +301,7 @@ function AnnotationForm(props) {
               <Checkbox
                 onChange={e => toggleAnnotation("gene-pathway-annotation", e)}
               >
-                Gene Pathway
+                Curated Pathways
               </Checkbox>
               {annotations.includes("gene-pathway-annotation") && (
                 <div className="annotation-parameters">

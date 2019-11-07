@@ -1,6 +1,15 @@
 import React, { useState, useEffect, Fragment } from "react";
 import { HashRouter as Router, Route, Link, Redirect } from "react-router-dom";
-import { Button, Alert, Spin, Typography, Icon } from "antd";
+import {
+  Button,
+  Alert,
+  Spin,
+  Typography,
+  Icon,
+  Tabs,
+  Modal,
+  Table
+} from "antd";
 import { parse, distanceInWordsToNow } from "date-fns";
 import { RESULT_ADDR, downloadSchemeFile } from "../../service";
 import TabbedTables from "../../components/result-tables";
@@ -8,6 +17,7 @@ import Visualizer from "../../components/visualizer";
 import Header from "../../components/header";
 import sessionNotFound from "../../assets/session-not-found.svg";
 import "./style.css";
+const width = document.body.clientWidth || window.screen.width;
 
 export const AnnotationStatus = {
   ACTIVE: 1,
@@ -19,6 +29,8 @@ function AnnotationResult(props) {
   const [response, setResponse] = useState(undefined);
   const [isTableShown, setTableShown] = useState(false);
   const [isFetchingResult, setFetchingResult] = useState(false);
+  const [summary, setSummary] = useState(undefined);
+  const [isSummaryShown, setSummaryShown] = useState(false);
   const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
   const id = props.match.params.id;
 
@@ -101,6 +113,24 @@ function AnnotationResult(props) {
           {distanceInWordsToNow(parse(response.expire_time * 1000))}.
         </p>
         <div className="inline-buttons">
+          <Button
+            onClick={e => {
+              if (!summary) {
+                fetch(`${RESULT_ADDR}/summary/${id}`).then(data => {
+                  data
+                    .clone()
+                    .text()
+                    .then(t => {
+                      setSummary(JSON.parse(t));
+                    });
+                });
+              }
+              setSummaryShown(true);
+            }}
+          >
+            View summary
+          </Button>
+
           <Button onClick={e => setTableShown(true)}>View results table</Button>
           <Button onClick={() => downloadSchemeFile(props.match.params.id)}>
             Download Scheme File
@@ -120,6 +150,89 @@ function AnnotationResult(props) {
       </Fragment>
     );
   };
+
+  const renderSummaryTable = tableData => {
+    const rows = Object.values(tableData).reduce(
+      (acc, v) => ({ ...acc, ...v[0] }),
+      {}
+    );
+    return (
+      <Table
+        columns={[
+          { title: "", dataIndex: "col", key: "col" },
+          ...Object.keys(rows).map((r, i) => ({
+            title: r.split("_").join(" "),
+            dataIndex: `col${i}`,
+            key: `col${i}`
+          }))
+        ]}
+        dataSource={[
+          ...Object.keys(tableData).map((k, i) => ({
+            key: `row${i}`,
+            col: k,
+            ...Object.keys(rows).reduce(
+              (acc, cur, i) => ({
+                ...acc,
+                [`col${i}`]: tableData[k][0][cur] || "-"
+              }),
+              {}
+            )
+          }))
+        ]}
+      />
+    );
+  };
+
+  const renderSummary = data => (
+    <Modal
+      visible={true}
+      onCancel={() => setSummaryShown(false)}
+      width={width - 90}
+      footer={null}
+    >
+      {data ? (
+        <div className="content">
+          A Reference Databases:{" "}
+          <a href={data["A Reference Databases"]}>
+            {data["A Reference Databases"]}
+          </a>
+          <Tabs
+            tabBarExtraContent={
+              summary && (
+                <Button
+                  icon="download"
+                  onClick={() => {
+                    let json = JSON.stringify(summary);
+                    const link = document.createElement("a");
+                    let file = new Blob([json], { type: "text/json" });
+                    link.href = URL.createObjectURL(file);
+                    link.download = `summary.json`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                  }}
+                >
+                  Download summary JSON
+                </Button>
+              )
+            }
+          >
+            {Object.keys(data)
+              .filter((d, i) => i)
+              .map((d, i) => (
+                <Tabs.TabPane key={`k${i}`} tab={d} id={`tab${i}`}>
+                  {renderSummaryTable(Object.values(data)[i + 1])}
+                </Tabs.TabPane>
+              ))}
+          </Tabs>
+        </div>
+      ) : (
+        <Fragment>
+          <Spin style={{ marginRight: 15 }} /> Fetching summary ...
+        </Fragment>
+      )}
+    </Modal>
+  );
 
   return (
     <div className="content-wrapper">
@@ -167,6 +280,7 @@ function AnnotationResult(props) {
           id={id}
         />
       )}
+      {isSummaryShown && renderSummary(summary)}
     </div>
   );
 }
