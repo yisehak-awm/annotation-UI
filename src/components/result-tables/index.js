@@ -270,7 +270,7 @@ function ResultTables(props) {
                         )}
                       </Fragment>
                     ),
-                    col2: (
+                    col2: values[2] ? (
                       <a
                         href={`https://www.ebi.ac.uk/chebi/searchId.do?chebiId=${values[2].slice(
                           values[2].indexOf(":") + 1
@@ -278,6 +278,8 @@ function ResultTables(props) {
                       >
                         {values[2]}
                       </a>
+                    ) : (
+                      values[2]
                     )
                   };
                 })}
