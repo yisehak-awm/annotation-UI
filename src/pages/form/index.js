@@ -122,7 +122,7 @@ function AnnotationForm(props) {
         annotation.setFunctionname(sa);
         if (sa === "gene-go-annotation") {
           const ip = new Filter();
-          ip.setFilter("protien");
+          ip.setFilter("protein");
           ip.setValue(capitalizeFirstLetter(includeProtiens.toString()));
           annotation.setFiltersList([namespace, nop, ip]);
         } else if (sa === "gene-pathway-annotation") {
