@@ -45,6 +45,11 @@ const AnnotationGroups = [
     group: "biogrid-interaction-annotation",
     color: "#3498DB",
     subgroups: []
+  },
+  {
+    group: "rna-annotation",
+    color: "#eb2f96",
+    subgroups: []
   }
 ];
 
@@ -92,6 +97,7 @@ const CYTOSCAPE_STYLE = [
     selector: 'node[subgroup="Uniprot"]',
     css: { shape: "hexagon" }
   },
+
   {
     selector: 'node[subgroup="ChEBI"]',
     css: {
@@ -119,6 +125,15 @@ const CYTOSCAPE_STYLE = [
     css: {
       "target-arrow-shape": "triangle",
       "target-arrow-fill": "filled"
+    }
+  },
+  {
+    selector: e => {
+      return e.group() == "nodes" && e.data().group.includes("rna-annotation");
+    },
+    css: {
+      shape: "round-pentagon",
+      width: 200
     }
   }
 ];
@@ -154,7 +169,8 @@ function Visualizer(props) {
     "main%",
     "gene-go-annotation%",
     "gene-pathway-annotation%",
-    "biogrid-interaction-annotation%"
+    "biogrid-interaction-annotation%",
+    "rna-annotation%"
   ]);
   const [selectedNode, setSelectedNode] = useState({
     node: null,

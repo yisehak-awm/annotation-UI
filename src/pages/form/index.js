@@ -153,7 +153,10 @@ function AnnotationForm(props) {
     const noncoding = new Filter();
     noncoding.setFilter("noncoding");
     noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
-    includeRNA.setFiltersList([coding, noncoding]);
+    const protein = new Filter();
+    protein.setFilter("protein");
+    protein.setValue(includeProtiens ? "1" : "0");
+    includeRNA.setFiltersList([coding, noncoding, protein]);
     annotationRequest.setAnnotationsList([...annList, includeRNA]);
 
     grpc.unary(Annotate.Annotate, {
