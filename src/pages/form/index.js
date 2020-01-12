@@ -157,7 +157,11 @@ function AnnotationForm(props) {
     protein.setFilter("protein");
     protein.setValue(includeProtiens ? "1" : "0");
     includeRNA.setFiltersList([coding, noncoding, protein]);
-    annotationRequest.setAnnotationsList([...annList, includeRNA]);
+    annotationRequest.setAnnotationsList(
+      includeCodingRNA || includeNoncodingRNA
+        ? [...annList, includeRNA]
+        : annList
+    );
 
     grpc.unary(Annotate.Annotate, {
       request: annotationRequest,
