@@ -41,7 +41,6 @@ const BiogridColumns = [
     key: "pmid",
     render: text => (
       <Fragment>
-        {console.log(text)}
         {text
           .trim()
           .split("\n")
@@ -117,6 +116,53 @@ function ResultTables(props) {
     fetchTableData(tables[tab].fileName);
   }, []);
 
+  useEffect(() => {}, [tables]);
+
+  const renderRNAtable = () => {
+    const data = tables.find(t => t.displayName === "RNA").data;
+    const table = parseTable(data).data;
+    const genes = table[0].slice(1).filter((g, i) => table[0].indexOf(g) === i);
+    const tableData = table.slice(3);
+    const numberOfColumns = table[0].slice(1).length / genes.length;
+    const columns = getPathwayColumns(numberOfColumns, table[2].slice(1));
+
+    return (
+      <>
+        {genes.map((p, i) => (
+          <Table
+            columns={columns}
+            dataSource={tableData
+              .filter(row => {
+                const values = row.slice(
+                  i * numberOfColumns + 1,
+                  i * numberOfColumns + (numberOfColumns + 1)
+                );
+                return values.some(v => v);
+              })
+              .map((row, j) => {
+                const values = row.slice(
+                  i * numberOfColumns + 1,
+                  i * numberOfColumns + (numberOfColumns + 1)
+                );
+                const protien = values[1]
+                  .trim()
+                  .split(" ")
+                  .filter(s => s);
+                return {
+                  key: `${p}-row-${j}`,
+                  "serial-number": j + 1,
+                  col0: values[0],
+                  col1: values[1]
+                };
+              })}
+            bordered
+            size="small"
+          />
+        ))}
+      </>
+    );
+  };
+
   const renderGeneGOTable = () => {
     const data = tables.find(t => t.displayName === "GO").data;
     const table = parseTable(data).data;
@@ -157,9 +203,7 @@ function ResultTables(props) {
                     "col0-id":
                       (
                         <a
-                          href={`http://amigo.geneontology.org/amigo/term/${
-                            values[1]
-                          }`}
+                          href={`http://amigo.geneontology.org/amigo/term/${values[1]}`}
                         >
                           {values[1]}
                         </a>
@@ -168,9 +212,7 @@ function ResultTables(props) {
                     "col2-id":
                       (
                         <a
-                          href={`http://amigo.geneontology.org/amigo/term/${
-                            values[3]
-                          }`}
+                          href={`http://amigo.geneontology.org/amigo/term/${values[3]}`}
                         >
                           {values[3]}
                         </a>
@@ -179,9 +221,7 @@ function ResultTables(props) {
                     "col4-id":
                       (
                         <a
-                          href={`http://amigo.geneontology.org/amigo/term/${
-                            values[5]
-                          }`}
+                          href={`http://amigo.geneontology.org/amigo/term/${values[5]}`}
                         >
                           {values[5]}
                         </a>
@@ -240,9 +280,7 @@ function ResultTables(props) {
                     "serial-number": j + 1,
                     col0: (
                       <a
-                        href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                          values[0]
-                        }`}
+                        href={`https://www.ncbi.nlm.nih.gov/gene/?term=${values[0]}`}
                       >
                         {values[0]}
                       </a>
@@ -261,9 +299,7 @@ function ResultTables(props) {
                         )}
                         {protien.length > 1 && (
                           <a
-                            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                              protien[1]
-                            }`}
+                            href={`https://www.ncbi.nlm.nih.gov/gene/?term=${protien[1]}`}
                           >
                             {protien[1]}
                           </a>
@@ -343,9 +379,7 @@ function ResultTables(props) {
                       </a>
                     ) : (
                       <a
-                        href={`https://www.ncbi.nlm.nih.gov/gene/?term=${
-                          values[1]
-                        }`}
+                        href={`https://www.ncbi.nlm.nih.gov/gene/?term=${values[1]}`}
                       >
                         {values[1]}
                       </a>
@@ -378,6 +412,7 @@ function ResultTables(props) {
             setTab(+value);
           }}
           tabBarExtraContent={
+            tables[tab] &&
             tables[tab].data && (
               <Fragment>
                 <Button
@@ -401,6 +436,8 @@ function ResultTables(props) {
               {t.data && t.displayName === "GO" && renderGeneGOTable()}
               {t.data && t.displayName === "PATHWAY" && renderPathwayTable()}
               {t.data && t.displayName === "BIOGRID" && renderBiogridTable()}
+              {t.data && t.displayName === "RNA" && renderRNAtable()}
+
               {i === tab && !t.data ? (
                 <div className="tabbed-table-spinner-wrapper">
                   <Spin /> Fetching table content ...

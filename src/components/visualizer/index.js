@@ -97,7 +97,6 @@ const CYTOSCAPE_STYLE = [
     selector: 'node[subgroup="Uniprot"]',
     css: { shape: "hexagon" }
   },
-
   {
     selector: 'node[subgroup="ChEBI"]',
     css: {
