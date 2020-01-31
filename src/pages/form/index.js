@@ -136,12 +136,24 @@ function AnnotationForm(props) {
         const capb = new Filter();
         capb.setFilter("biogrid");
         capb.setValue(annotatePathwayWithBiogrid ? "1" : "0");
-        annotation.setFiltersList([ps, ip, ism, capb]);
+        const coding = new Filter();
+        coding.setFilter("coding");
+        coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
+        const noncoding = new Filter();
+        noncoding.setFilter("noncoding");
+        noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
+        annotation.setFiltersList([ps, ip, ism, capb,coding,noncoding]);
       } else if (sa === "biogrid-interaction-annotation") {
         const int = new Filter();
         int.setFilter("interaction");
         int.setValue(includeProtiens ? "Proteins" : "Genes");
-        annotation.setFiltersList([int]);
+        const coding = new Filter();
+        coding.setFilter("coding");
+        coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
+        const noncoding = new Filter();
+        noncoding.setFilter("noncoding");
+        noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
+        annotation.setFiltersList([int,coding,noncoding]);
       }
       return annotation;
     });
