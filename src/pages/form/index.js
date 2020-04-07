@@ -14,7 +14,7 @@ import {
   Col,
   message,
   notification,
-  Alert
+  Alert,
 } from "antd";
 import Header from "../../components/header";
 import { Annotate } from "../../proto/annotation_pb_service";
@@ -23,7 +23,7 @@ import {
   AnnotationRequest,
   Annotation,
   Gene,
-  Filter
+  Filter,
 } from "../../proto/annotation_pb";
 import { GRPC_ADDR, capitalizeFirstLetter } from "../../service";
 import "./style.css";
@@ -31,7 +31,7 @@ import "./style.css";
 const GeneGoOptions = [
   { label: "Biological Process", value: "biological_process" },
   { label: "Cellular Component", value: "cellular_component" },
-  { label: "Molecular Function", value: "molecular_function" }
+  { label: "Molecular Function", value: "molecular_function" },
 ];
 
 const Pathways = [
@@ -42,8 +42,8 @@ const Pathways = [
         Reactome
       </a>
     ),
-    value: "reactome"
-  }
+    value: "reactome",
+  },
 ];
 
 const GeneInputMethods = { Manual: "manual", Import: "import" };
@@ -63,7 +63,7 @@ function AnnotationForm(props) {
   const [GOSubgroups, setGOSubgroups] = useState([
     "biological_process",
     "cellular_component",
-    "molecular_function"
+    "molecular_function",
   ]);
   const [geneInputMethod, setGeneInputMethod] = useState(
     GeneInputMethods.Manual
@@ -71,12 +71,9 @@ function AnnotationForm(props) {
   const [includeCodingRNA, setIncludeCodingRNA] = useState(false);
   const [includeNoncodingRNA, setIncludeNoncodingRNA] = useState(false);
 
-  const addGene = e => {
-    const gene = e.target.value
-      .trim()
-      .toUpperCase()
-      .split(" ");
-    gene.some(g => genes.includes(g))
+  const addGene = (e) => {
+    const gene = e.target.value.trim().toUpperCase().split(" ");
+    gene.some((g) => genes.includes(g))
       ? message.warn("Gene already exists!")
       : setGenes([...genes, ...gene]);
     geneInputRef.current.setValue("");
@@ -85,11 +82,11 @@ function AnnotationForm(props) {
   const toggleAnnotation = (annotation, e) => {
     const updated = e.target.checked
       ? [...annotations, annotation]
-      : annotations.filter(a => a !== annotation);
+      : annotations.filter((a) => a !== annotation);
     setAnnotations(updated);
   };
 
-  const handleFileUpload = file => {
+  const handleFileUpload = (file) => {
     const reader = new FileReader();
     reader.onload = () => {
       setGenes(reader.result.split("\n"));
@@ -102,7 +99,7 @@ function AnnotationForm(props) {
     setLoading(true);
     const annotationRequest = new AnnotationRequest();
     annotationRequest.setGenesList(
-      genes.map(g => {
+      genes.map((g) => {
         const gene = new Gene();
         gene.setGenename(g);
         return gene;
@@ -115,7 +112,7 @@ function AnnotationForm(props) {
     const nop = new Filter();
     nop.setFilter("parents");
     nop.setValue(parents.toString());
-    const annList = annotations.map(sa => {
+    const annList = annotations.map((sa) => {
       const annotation = new Annotation();
       annotation.setFunctionname(sa);
       if (sa === "gene-go-annotation") {
@@ -141,8 +138,10 @@ function AnnotationForm(props) {
         coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
         const noncoding = new Filter();
         noncoding.setFilter("noncoding");
-        noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
-        annotation.setFiltersList([ps, ip, ism, capb,coding,noncoding]);
+        noncoding.setValue(
+          capitalizeFirstLetter(includeNoncodingRNA.toString())
+        );
+        annotation.setFiltersList([ps, ip, ism, capb, coding, noncoding]);
       } else if (sa === "biogrid-interaction-annotation") {
         const int = new Filter();
         int.setFilter("interaction");
@@ -152,8 +151,10 @@ function AnnotationForm(props) {
         coding.setValue(capitalizeFirstLetter(includeCodingRNA.toString()));
         const noncoding = new Filter();
         noncoding.setFilter("noncoding");
-        noncoding.setValue(capitalizeFirstLetter(includeNoncodingRNA.toString()));
-        annotation.setFiltersList([int,coding,noncoding]);
+        noncoding.setValue(
+          capitalizeFirstLetter(includeNoncodingRNA.toString())
+        );
+        annotation.setFiltersList([int, coding, noncoding]);
       }
       return annotation;
     });
@@ -184,32 +185,66 @@ function AnnotationForm(props) {
           props.history.push({
             pathname: `/result/${msg.array[0].substr(
               msg.array[0].indexOf("id=") + 3
-            )}`
+            )}`,
           });
         } else {
-          if (statusMessage.includes("Gene Doesn't exist")) {
-            const invalidGenes = statusMessage
-              .split("`")[1]
-              .split(",")
-              .map(g => g.trim())
-              .filter(g => g);
-            setGenes(genes.filter(g => !invalidGenes.includes(g)));
+          let error;
+          try {
+            error = JSON.parse(statusMessage);
+          } catch (err) {
+            error = statusMessage;
+          }
+
+          if (Array.isArray(error)) {
+            const invalidGenes = error.map((g) => g.symbol);
+            setGenes(genes.filter((g) => !invalidGenes.includes(g)));
             notification.warning({
-              message: "Gene not found",
-              description: statusMessage.split(",").join(" , "),
-              duration: 10,
-              placement: "bottomRight"
+              message: (
+                <Typography.Title level={4}>Gene not found</Typography.Title>
+              ),
+              description: (
+                <div>
+                  {error
+                    .filter((e) => e.current !== "")
+                    .map((g) => (
+                      <p key={g.symbol}>
+                        Symbol for gene <Tag color="red">{g.symbol}</Tag> has
+                        changed to <Tag color="green">{g.current}</Tag>
+                      </p>
+                    ))}
+                  {error
+                    .filter((e) => e.similar.length)
+                    .map((e) => (
+                      <p key={e.symbol}>
+                        <Tag color="red">{e.symbol}</Tag> was not found in the
+                        atomspace. Did you mean{" "}
+                        {e.similar.map((s) => (
+                          <Tag
+                            key={s}
+                            color="green"
+                            // style={{ fontSize: "1.1rem" }}
+                          >
+                            {s}
+                          </Tag>
+                        ))}
+                        ?
+                      </p>
+                    ))}
+                </div>
+              ),
+              duration: 0,
+              placement: "bottomRight",
             });
           } else {
             notification.error({
               message: "An error occurred",
               description: statusMessage,
               duration: 10,
-              placement: "bottomRight"
+              placement: "bottomRight",
             });
           }
         }
-      }
+      },
     });
   };
 
@@ -242,11 +277,11 @@ function AnnotationForm(props) {
             <Tabs.TabPane tab="Import from file" key={GeneInputMethods.Import}>
               <Upload.Dragger
                 multiple={false}
-                beforeUpload={file => {
+                beforeUpload={(file) => {
                   handleFileUpload(file);
                   return false;
                 }}
-                previewFile={file => null}
+                previewFile={(file) => null}
               >
                 <p className="ant-upload-drag-icon">
                   <Icon type="inbox" />
@@ -261,13 +296,13 @@ function AnnotationForm(props) {
             </Tabs.TabPane>
           </Tabs>
           <div className="gene-list">
-            {genes.map(g => (
+            {genes.map((g) => (
               <Tag
                 closable
                 color="purple"
                 key={g}
                 onClose={() => {
-                  setGenes(genes.filter(f => f !== g));
+                  setGenes(genes.filter((f) => f !== g));
                 }}
               >
                 {g}
@@ -279,7 +314,7 @@ function AnnotationForm(props) {
                 type="danger"
                 size="small"
                 ghost
-                onClick={e => setGenes([])}
+                onClick={(e) => setGenes([])}
               />
             )}
           </div>
@@ -288,7 +323,7 @@ function AnnotationForm(props) {
           <ul className="annotation-list">
             <li>
               <Checkbox
-                onChange={e => toggleAnnotation("gene-go-annotation", e)}
+                onChange={(e) => toggleAnnotation("gene-go-annotation", e)}
               >
                 <a href="http://www.geneontology.org" target="_blank">
                   Gene Ontology
@@ -318,7 +353,7 @@ function AnnotationForm(props) {
             </li>
             <li>
               <Checkbox
-                onChange={e => toggleAnnotation("gene-pathway-annotation", e)}
+                onChange={(e) => toggleAnnotation("gene-pathway-annotation", e)}
               >
                 Curated Pathways
               </Checkbox>
@@ -352,7 +387,7 @@ function AnnotationForm(props) {
             </li>
             <li>
               <Checkbox
-                onChange={e =>
+                onChange={(e) =>
                   toggleAnnotation("biogrid-interaction-annotation", e)
                 }
               >
