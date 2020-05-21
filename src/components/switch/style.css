@@ -1,0 +1,28 @@
+.si.si-switcher label {
+  line-height: calc(var(--input-size) * 0.8);
+  margin-left: calc(var(--input-size) * 0.7);
+}
+
+.si.si-switcher label::before {
+  content: "";
+  width: calc(var(--input-size) * 1.5);
+  height: calc(var(--input-size));
+  border-radius: var(--input-radius);
+  top: 0;
+}
+
+.si.si-switcher label::after {
+  content: "";
+  border-radius: var(--input-radius);
+  width: calc(var(--input-size) * 0.4);
+  height: calc(var(--input-size) * 0.7);
+  background-color: var(--color-default);
+  position: absolute;
+  top: calc(var(--input-size) * 0.15);
+  left: calc(var(--input-size) * 0.15);
+}
+
+.si.si-switcher > input:checked + label::after {
+  background-color: #fff;
+  left: calc(var(--input-size) * 0.9);
+}

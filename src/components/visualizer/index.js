@@ -9,7 +9,7 @@ import {
   Spin,
   Typography,
   Drawer,
-  Icon
+  Icon,
 } from "antd";
 import removeSvg from "../../assets/remove.svg";
 import addSvg from "../../assets/add.svg";
@@ -33,24 +33,24 @@ const AnnotationGroups = [
     subgroups: [
       { subgroup: "cellular_component", color: "#F57C00" },
       { subgroup: "molecular_function", color: "#F1C40F" },
-      { subgroup: "biological_process", color: "#8BC34A" }
-    ]
+      { subgroup: "biological_process", color: "#8BC34A" },
+    ],
   },
   {
     group: "gene-pathway-annotation",
     color: "#9B59B6",
-    subgroups: [{ subgroup: "Reactome" }]
+    subgroups: [{ subgroup: "Reactome" }],
   },
   {
     group: "biogrid-interaction-annotation",
     color: "#3498DB",
-    subgroups: []
+    subgroups: [],
   },
   {
     group: "rna-annotation",
     color: "#eb2f96",
-    subgroups: []
-  }
+    subgroups: [],
+  },
 ];
 
 const CYTOSCAPE_COLA_CONFIG = {
@@ -64,7 +64,7 @@ const CYTOSCAPE_COLA_CONFIG = {
   randomize: true,
   avoidOverlap: true,
   handleDisconnected: true,
-  infinite: false
+  infinite: false,
 };
 
 const CYTOSCAPE_STYLE = [
@@ -82,59 +82,59 @@ const CYTOSCAPE_STYLE = [
       "text-halign": "center",
       "background-color": "#565656",
       "text-outline-color": "#565656",
-      "text-outline-width": 1
-    }
+      "text-outline-width": 1,
+    },
   },
   {
-    selector: n => n.data().subgroup === "Genes",
+    selector: (n) => n.data().subgroup === "Genes",
     style: {
       shape: "ellipse",
       height: 75,
-      width: 75
-    }
+      width: 75,
+    },
   },
   {
     selector: 'node[subgroup="Uniprot"]',
-    css: { shape: "hexagon" }
+    css: { shape: "hexagon" },
   },
   {
     selector: 'node[subgroup="ChEBI"]',
     css: {
       shape: "diamond",
-      height: 75
-    }
+      height: 75,
+    },
   },
   {
     selector: "node:selected",
     css: {
       "border-width": 5,
-      "border-color": "#87bef5"
-    }
+      "border-color": "#87bef5",
+    },
   },
   {
     selector: "edge",
     css: {
       "curve-style": "straight",
       "line-color": "#ccc",
-      width: 4
-    }
+      width: 4,
+    },
   },
   {
-    selector: e => e.data().group.includes("gene-go-annotation"),
+    selector: (e) => e.data().group.includes("gene-go-annotation"),
     css: {
       "target-arrow-shape": "triangle",
-      "target-arrow-fill": "filled"
-    }
+      "target-arrow-fill": "filled",
+    },
   },
   {
-    selector: e => {
+    selector: (e) => {
       return e.group() == "nodes" && e.data().group.includes("rna-annotation");
     },
     css: {
       shape: "round-pentagon",
-      width: 200
-    }
-  }
+      width: 200,
+    },
+  },
 ];
 
 function Visualizer(props) {
@@ -148,7 +148,7 @@ function Visualizer(props) {
   const [isDrawerOpen, setDrawerOpen] = useState(true);
   const [nodeTypes, setNodeTypes] = useState(
     props.graph.nodes
-      .map(n => n.data.subgroup)
+      .map((n) => n.data.subgroup)
       .filter((s, i, arr) => {
         return (
           arr.indexOf(s) === i && ["Genes", "Uniprot", "ChEBI"].includes(s)
@@ -157,7 +157,7 @@ function Visualizer(props) {
   );
   const [linkTypes, setLinkTypes] = useState(
     props.graph.edges
-      .map(e => e.data.subgroup)
+      .map((e) => e.data.subgroup)
       .filter((s, i, arr) => {
         return arr.indexOf(s) === i;
       })
@@ -169,20 +169,20 @@ function Visualizer(props) {
     "gene-go-annotation%",
     "gene-pathway-annotation%",
     "biogrid-interaction-annotation%",
-    "rna-annotation%"
+    "rna-annotation%",
   ]);
   const [selectedNode, setSelectedNode] = useState({
     node: null,
-    position: null
+    position: null,
   });
   const [selectedEdge, setSelectedEdge] = useState({
-    pubmed: null
+    pubmed: null,
   });
   const [MLLPositions, setMLLPositions] = useState(undefined);
   // Save MLL positions
   !MLLPositions &&
     setMLLPositions(
-      JSON.parse(JSON.stringify(props.graph.nodes)).reduce(function(
+      JSON.parse(JSON.stringify(props.graph.nodes)).reduce(function (
         prevVal,
         n,
         i
@@ -192,37 +192,32 @@ function Visualizer(props) {
       {})
     );
 
-  useEffect(function() {
+  useEffect(function () {
     setCy(
       cytoscape({
         container: cy_wrapper.current,
         hideEdgesOnViewport: true,
-        wheelSensitivity: 0.3
+        wheelSensitivity: 0.3,
       })
     );
   }, []);
 
   useEffect(
-    function() {
+    function () {
       cy && toggleAnnotationVisibility(visibleAnnotations);
     },
     [visibleAnnotations, visibleNodeTypes, visibleLinkTypes, cy]
   );
 
   useEffect(
-    function() {
+    function () {
       if (!cy) return;
       if (filteredElements) {
         cy.batch(() => filteredElements.style({ opacity: 1 }));
         cy.batch(() =>
-          cy
-            .nodes()
-            .difference(filteredElements)
-            .style({ opacity: 0.1 })
+          cy.nodes().difference(filteredElements).style({ opacity: 0.1 })
         );
-        cy.edges()
-          .difference(filteredElements)
-          .style({ opacity: 0 });
+        cy.edges().difference(filteredElements).style({ opacity: 0 });
         contextMenu.showMenuItem("add");
         contextMenu.showMenuItem("remove");
         contextMenu.hideMenuItem("filter");
@@ -239,20 +234,20 @@ function Visualizer(props) {
   );
 
   useEffect(
-    function() {
+    function () {
       if (cy) {
         coseLayout();
         cy.style([
           ...CYTOSCAPE_STYLE,
           ...assignColorToAnnotations(),
           {
-            selector: n => n.data().group.includes("main"),
+            selector: (n) => n.data().group.includes("main"),
             style: {
               "background-fill": "solid",
               "background-color": "blue",
-              "text-outline-color": "blue"
-            }
-          }
+              "text-outline-color": "blue",
+            },
+          },
         ]);
         // var nav = cy.navigator(NAVIGATOR_CONFIG);
         var options = {
@@ -261,34 +256,34 @@ function Visualizer(props) {
               id: "filter",
               content: "Filter",
               selector: "node",
-              onClickFunction: e => {
+              onClickFunction: (e) => {
                 addToFilter(e.target.data().id);
               },
               hasTrailingDivider: true,
-              image: { src: filterSvg, width: 18, height: 18, x: 8, y: 8 }
+              image: { src: filterSvg, width: 18, height: 18, x: 8, y: 8 },
             },
             {
               id: "add",
               content: "Add",
               selector: "node",
               image: { src: addSvg, width: 18, height: 18, x: 8, y: 8 },
-              onClickFunction: e => addToFilter(e.target.data().id),
-              show: false
+              onClickFunction: (e) => addToFilter(e.target.data().id),
+              show: false,
             },
             {
               id: "remove",
               content: "Remove",
               selector: "node",
               image: { src: removeSvg, width: 18, height: 18, x: 8, y: 8 },
-              onClickFunction: e => removeFromFilter(e.target.data().id),
-              show: false
+              onClickFunction: (e) => removeFromFilter(e.target.data().id),
+              show: false,
             },
             {
               id: "copy",
               content: "Copy ID",
               selector: "node",
               image: { src: copySvg, width: 18, height: 18, x: 8, y: 8 },
-              onClickFunction: e => {
+              onClickFunction: (e) => {
                 const el = document.createElement("textarea");
                 el.value = e.target.data().id;
                 document.body.appendChild(el);
@@ -296,11 +291,11 @@ function Visualizer(props) {
                 document.execCommand("copy");
                 document.body.removeChild(el);
               },
-              show: true
-            }
+              show: true,
+            },
           ],
           menuItemClasses: ["context-menu-item"],
-          contextMenuClasses: ["context-menu"]
+          contextMenuClasses: ["context-menu"],
         };
         setContextMenu(cy.contextMenus(options));
       }
@@ -309,13 +304,13 @@ function Visualizer(props) {
   );
 
   useEffect(
-    function() {
+    function () {
       if (layout) {
         const l = filteredElements
           ? filteredElements.layout(layout)
           : cy.layout(layout);
         setLoaderText("Applying layout, please wait ...");
-        l.pon("layoutstop", function() {
+        l.pon("layoutstop", function () {
           setLoaderText(undefined);
         });
         l.run();
@@ -331,9 +326,9 @@ function Visualizer(props) {
   const coseLayout = () => {
     setLayout({
       name: "preset",
-      positions: function(n) {
+      positions: function (n) {
         return MLLPositions[n.id()];
-      }
+      },
     });
   };
 
@@ -344,8 +339,8 @@ function Visualizer(props) {
   const concentricLayout = () => {
     setLayout({
       name: "concentric",
-      concentric: node => node.degree(),
-      levelWidth: () => 3
+      concentric: (node) => node.degree(),
+      levelWidth: () => 3,
     });
   };
 
@@ -360,46 +355,46 @@ function Visualizer(props) {
 
   const registerEventListeners = () => {
     cy.nodes()
-      .on("select", e =>
+      .on("select", (e) =>
         setSelectedNode({
           node: e.target.data(),
-          position: e.target.renderedPosition()
+          position: e.target.renderedPosition(),
         })
       )
-      .on("unselect", e => setSelectedNode({ node: null }));
+      .on("unselect", (e) => setSelectedNode({ node: null }));
 
     cy.edges()
-      .on("select", e => {
+      .on("select", (e) => {
         let pubMedIds = e.target.data().pubmedId.split(",");
         pubMedIds[0] !== ""
           ? setSelectedEdge({
-              pubmed: pubMedIds
+              pubmed: pubMedIds,
             })
           : setSelectedEdge({ pubmed: null });
       })
-      .on("unselect", e => setSelectedEdge({ pubmed: null, position: null }));
+      .on("unselect", (e) => setSelectedEdge({ pubmed: null, position: null }));
   };
 
   const clearFilter = () => {
     setFilteredElements(undefined);
   };
 
-  const removeFromFilter = id => {
+  const removeFromFilter = (id) => {
     const hood = cy
       .getElementById(id)
       .union(cy.getElementById(id).connectedEdges());
-    setFilteredElements(eles => eles.difference(hood));
+    setFilteredElements((eles) => eles.difference(hood));
   };
 
-  const addToFilter = id => {
+  const addToFilter = (id) => {
     const hood = cy.getElementById(id).closedNeighborhood();
-    setFilteredElements(eles => (eles ? eles.union(hood) : hood));
+    setFilteredElements((eles) => (eles ? eles.union(hood) : hood));
   };
 
   const downloadGraphJSON = () => {
     let exportJson = {
       data: { name: "Annotation Service Export" },
-      elements: cy.json().elements
+      elements: cy.json().elements,
     };
     let json = JSON.stringify(exportJson);
     const link = document.createElement("a");
@@ -411,7 +406,7 @@ function Visualizer(props) {
     link.remove();
   };
 
-  const formatDescription = description => {
+  const formatDescription = (description) => {
     if (!description) return "";
     return description.includes("https://") ||
       description.includes("http://") ? (
@@ -423,12 +418,12 @@ function Visualizer(props) {
     );
   };
 
-  const toggleAnnotationVisibility = visibleAnnotations => {
+  const toggleAnnotationVisibility = (visibleAnnotations) => {
     const { nodes, edges } = props.graph;
-    const visibleNodes = nodes.filter(n => {
+    const visibleNodes = nodes.filter((n) => {
       const { group, subgroup } = n.data;
       return (
-        visibleAnnotations.some(a => {
+        visibleAnnotations.some((a) => {
           const [g, sg] = a.split("%");
           return (
             group.includes(g) &&
@@ -441,19 +436,19 @@ function Visualizer(props) {
         }) || group.includes("main")
       );
     });
-    const visibleEdges = edges.filter(e => {
+    const visibleEdges = edges.filter((e) => {
       const { source, target, subgroup } = e.data;
       return (
-        visibleNodes.some(n => n.data.id === source) &&
-        visibleNodes.some(n => n.data.id === target) &&
-        visibleLinkTypes.some(s => s === subgroup)
+        visibleNodes.some((n) => n.data.id === source) &&
+        visibleNodes.some((n) => n.data.id === target) &&
+        visibleLinkTypes.some((s) => s === subgroup)
       );
     });
     cy.json({ elements: { nodes: visibleNodes } });
     cy.add(visibleEdges);
     cy.remove(
       cy.filter(
-        ele =>
+        (ele) =>
           ele.isNode() && !ele.degree() && !ele.data().group.includes("main")
       )
     );
@@ -464,75 +459,74 @@ function Visualizer(props) {
   const getAnnotationPercentage = (group, subgroup) => {
     const { nodes } = props.graph;
     let filteredNodes = group
-      ? nodes.filter(n => n.data.group.includes(group))
+      ? nodes.filter((n) => n.data.group.includes(group))
       : nodes;
     filteredNodes = subgroup
-      ? filteredNodes.filter(n => n.data.subgroup === subgroup)
+      ? filteredNodes.filter((n) => n.data.subgroup === subgroup)
       : filteredNodes;
     return (filteredNodes.length * 100) / nodes.length;
   };
 
   const assignColorToAnnotations = () => {
     const styles = AnnotationGroups.reduce((acc, annotation) => {
-      const subGroupColors = annotation.subgroups.map(sg => {
+      const subGroupColors = annotation.subgroups.map((sg) => {
         return {
-          selector: n =>
+          selector: (n) =>
             n.data().group.includes(annotation.group) &&
             n.data().subgroup === sg.subgroup,
           style: {
             "background-color": annotation.color || sg.color,
-            "text-outline-color": annotation.color || sg.color
-          }
+            "text-outline-color": annotation.color || sg.color,
+          },
         };
       });
       return annotation.color
         ? [
             ...acc,
             {
-              selector: n => n.data().group.includes(annotation.group),
+              selector: (n) => n.data().group.includes(annotation.group),
               style: {
                 "background-color": annotation.color,
                 "text-outline-color": annotation.color,
-                "line-color": Color(annotation.color)
-                  .lighten(0.6)
-                  .hex()
-              }
+                "line-color": Color(annotation.color).lighten(0.6).hex(),
+              },
             },
-            ...subGroupColors
+            ...subGroupColors,
           ]
         : [...acc, ...subGroupColors];
     }, []);
 
     const multipleGroupsStyle = {
-      selector: n => n.data().group.length > 1,
+      selector: (n) => n.data().group.length > 1,
       style: {
         "background-fill": "linear-gradient",
         "background-gradient-direction": "to-bottom-right",
         "text-outline-color": "#565656",
-        "background-gradient-stop-colors": n =>
+        "background-gradient-stop-colors": (n) =>
           n.data().group.reduce((acc, group) => {
             if (group === "main") return acc;
             const color =
-              AnnotationGroups.find(g => g.group === group).color || "#565656";
+              AnnotationGroups.find((g) => g.group === group).color ||
+              "#565656";
             return `${acc} ${color} ${color}`;
           }, ""),
-        "background-gradient-stop-positions": n => {
-          const group = n.data().group.filter(g => g !== "main");
+        "background-gradient-stop-positions": (n) => {
+          const group = n.data().group.filter((g) => g !== "main");
           const width = 100 / group.length;
           let value = "0%";
           for (let i = 1; i < group.length; i++) {
             value += ` ${width * i}% ${width * i}%`;
           }
           return value + " 100%";
-        }
-      }
+        },
+      },
     };
 
     return [...styles, multipleGroupsStyle];
   };
 
-  const search = id => {
-    cy.batch(function() {
+  const search = (id) => {
+    cy.batch(function () {
       const selected = cy.nodes(`[id @= "${id}"]`);
       if (selected.size()) {
         selected.select();
@@ -551,7 +545,7 @@ function Visualizer(props) {
           className="percentage-bar"
           style={{
             backgroundColor: color,
-            width: `${percentage}%`
+            width: `${percentage}%`,
           }}
         />
       </div>
@@ -611,7 +605,7 @@ function Visualizer(props) {
             right: 360,
             borderTopRightRadius: 0,
             borderBottomRightRadius: 0,
-            boxShadow: "-2px 0 8px rgba(0,0,0,.15)"
+            boxShadow: "-2px 0 8px rgba(0,0,0,.15)",
           }}
           onClick={() => setDrawerOpen(true)}
         >
@@ -631,7 +625,7 @@ function Visualizer(props) {
                 onCheck={setVisibleNodeTypes}
                 checkable
               >
-                {nodeTypes.map(n => (
+                {nodeTypes.map((n) => (
                   <Tree.TreeNode key={n} title={n} />
                 ))}
               </Tree>
@@ -644,7 +638,7 @@ function Visualizer(props) {
                 onCheck={setVisibleLinkTypes}
                 checkable
               >
-                {linkTypes.map(n => (
+                {linkTypes.map((n) => (
                   <Tree.TreeNode key={n} title={n} />
                 ))}
               </Tree>
@@ -658,7 +652,7 @@ function Visualizer(props) {
                 onCheck={setVisibleAnnotations}
                 checkable
               >
-                {AnnotationGroups.filter(a =>
+                {AnnotationGroups.filter((a) =>
                   props.annotations.includes(a.group)
                 ).map((a, i) => {
                   return (
@@ -675,8 +669,8 @@ function Visualizer(props) {
                       }
                     >
                       {a.subgroups
-                        .filter(s => props.annotations.includes(s.subgroup))
-                        .map(s => (
+                        .filter((s) => props.annotations.includes(s.subgroup))
+                        .map((s) => (
                           <Tree.TreeNode
                             key={`${a.group}%${s.subgroup}`}
                             title={

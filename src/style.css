@@ -1,3 +1,19 @@
+:root {
+  font-size: 14px;
+  --color-default: #90949c;
+  --color-active: #0069ff;
+  --color-error: #ff2600;
+  --rotate-active: 40deg;
+  --border-size-checkmark: 2px;
+  --border-size-box: 1px;
+  --input-size: 30px;
+  --input-radius: 2px;
+}
+
+body {
+  font-size: 1rem;
+}
+
 .container {
   padding: 15px;
 }
@@ -7,9 +23,125 @@ img.empty-state {
   margin-top: 45px;
 }
 
-body {
-  background-image: url("./assets/bg.svg");
-  background-attachment: fixed;
-  background-size: cover;
-  padding-bottom: 100px;
+input[type="text"],
+input[type="number"],
+button {
+  border: 1px solid var(--color-default);
+  border-radius: var(--radius);
+}
+
+input[type="checkbox"] + label {
+  display: inline;
+}
+
+input[type="checkbox"] {
+  margin-right: calc(5px + var(--input-size) / 2);
+}
+
+button.link {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-active);
+}
+
+button.link:hover {
+  cursor: pointer;
+}
+
+button.link:focus {
+  outline: none;
+  text-decoration: underline;
+}
+
+.si,
+.si *,
+.si *::before,
+.si *::after {
+  box-sizing: border-box;
+}
+
+.si {
+  position: relative;
+  margin-bottom: 0.5rem;
+}
+
+.si > input {
+  clip-path: polygon(0 0);
+}
+
+.si label::before,
+.si label::after {
+  transition: all 0.2s ease-in-out;
+}
+
+.si:not(.si-uploader) label::before {
+  content: "";
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: var(--input-size);
+  height: var(--input-size);
+  border: var(--border-size-box) solid var(--color-default);
+  border-radius: var(--input-radius);
+}
+
+.si label:hover::before {
+  border-color: var(--color-active);
+}
+
+.si > input:checked + label::before {
+  background-color: var(--color-active);
+  border-color: var(--color-active);
+}
+
+.si input:focus + label::before,
+input[type="text"]:focus,
+input[type="number"]:focus {
+  outline: none;
+  border: 1px solid var(--color-active);
+}
+
+input[type="text"],
+input[type="number"] {
+  padding: 0.5rem;
+  display: block;
+}
+
+.y-button {
+  border-radius: var(--input-radius);
+  padding: 1rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  transition: all 0.2s ease-in-out;
+}
+
+.y-button:hover {
+  cursor: pointer;
+}
+
+.y-button:disabled:hover {
+  cursor: not-allowed;
+}
+
+.y-ghost-button {
+  background: none;
+  color: var(--color-default);
+  border: 1px solid var(--color-default);
+}
+
+.y-ghost-button:hover {
+  border-color: #000;
+  color: #000;
+}
+
+.y-primary-button {
+  background-color: var(--color-active);
+  color: #fff;
+  border: none;
+}
+
+.y-primary-button:disabled {
+  background-color: var(--color-default);
 }

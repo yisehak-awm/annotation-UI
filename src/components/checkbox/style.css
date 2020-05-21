@@ -1,0 +1,23 @@
+.si.si-checkbox label {
+  line-height: var(--input-size);
+}
+
+.si.si-checkbox label::after {
+  content: "";
+  display: block;
+  position: absolute;
+  top: -2px;
+  left: 0;
+  width: calc(var(--input-size) * 0.4);
+  height: calc(var(--input-size) * 0.9);
+  border-width: 0 var(--border-size-checkmark) var(--border-size-checkmark) 0;
+  border-color: transparent var(--color-active) var(--color-active) transparent;
+  border-style: solid;
+  transform: scale(0);
+}
+
+.si.si-checkbox > input:checked + label::after {
+  left: calc(var(--input-size) * 0.3);
+  transform: rotate(var(--rotate-active)) scale(1);
+  border-color: #fff;
+}

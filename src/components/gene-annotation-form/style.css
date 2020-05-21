@@ -1,0 +1,41 @@
+.gene-annotation-form .annotation-configuration {
+  margin-left: calc(var(--input-size) / 2);
+  padding: 15px 30px;
+  border-left: 1px dashed var(--color-default);
+}
+
+.gene-annotation-form .annotation-configuration[data-show="false"] {
+  display: none;
+}
+
+.gene-annotation-form .input {
+  margin-bottom: 10px;
+}
+
+.gene-annotation-form .inline-inputs {
+  display: flex;
+}
+
+.gene-annotation-form .inline-inputs .input {
+  margin-right: 15px;
+}
+
+.gene-annotation-form h3 {
+  margin: 15px 0;
+  font-size: 1.1rem;
+  font-family: Inter;
+  font-weight: bold;
+}
+
+.gene-annotation-form .input .error-message {
+  display: none;
+}
+
+.gene-annotation-form .input.has-error input {
+  border: 1px solid var(--color-error);
+}
+
+.gene-annotation-form .input.has-error .error-message {
+  color: var(--color-error);
+  display: block;
+}

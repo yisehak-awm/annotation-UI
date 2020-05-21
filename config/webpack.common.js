@@ -4,16 +4,16 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const paths = require("./paths.js");
 module.exports = {
-  entry: path.join(paths.srcPath, "index.js"),
+  entry: ["babel-polyfill", path.join(paths.srcPath, "index.js")],
   output: {
     path: paths.outPath,
-    filename: "bundle.js"
+    filename: "bundle.js",
   },
   devServer: {
     contentBase: paths.outPath,
     headers: {
-      "Access-Control-Allow-Origin": "*"
-    }
+      "Access-Control-Allow-Origin": "*",
+    },
   },
   module: {
     rules: [
@@ -23,31 +23,31 @@ module.exports = {
         include: paths.srcPath,
         exclude: /node_modules/,
         options: {
-          presets: [["@babel/env", { modules: false }], "@babel/react"]
-        }
+          presets: [["@babel/env", { modules: false }], "@babel/react"],
+        },
       },
       {
         test: /\.css$/,
-        use: ["style-loader", "css-loader"]
+        use: ["style-loader", "css-loader"],
       },
       {
         test: /\.(jpg|png|svg)$/,
         use: {
           loader: "file-loader",
           options: {
-            name: "[path][name].[hash].[ext]"
-          }
-        }
-      }
-    ]
+            name: "[path][name].[hash].[ext]",
+          },
+        },
+      },
+    ],
   },
 
   plugins: [
     new webpack.DefinePlugin({
       "process.env": {
         GRPC_ADDR: JSON.stringify(process.env.GRPC_ADDR),
-        RESULT_ADDR: JSON.stringify(process.env.RESULT_ADDR)
-      }
+        RESULT_ADDR: JSON.stringify(process.env.RESULT_ADDR),
+      },
     }),
     new HtmlWebpackPlugin({
       inject: true,
@@ -62,8 +62,8 @@ module.exports = {
         keepClosingSlash: true,
         minifyJS: true,
         minifyCSS: true,
-        minifyURLs: true
-      }
-    })
-  ]
+        minifyURLs: true,
+      },
+    }),
+  ],
 };

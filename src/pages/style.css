@@ -1,0 +1,50 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap");
+
+.landing-container {
+  display: flex;
+  height: 100vh;
+}
+
+.landing-container .greetings-container {
+  width: 40%;
+  padding: 30px 60px;
+  overflow: hidden;
+  background-color: var(--color-active);
+  position: relative;
+  background-image: url("../assets/header-image-dark.png");
+  background-position: 75% -75%;
+  background-repeat: no-repeat;
+}
+
+.landing-container .greetings-container h1 {
+  line-height: 1;
+  font-family: Inter;
+  font-size: 4rem;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 1rem;
+}
+
+.landing-container .greetings-container ol {
+  margin: 0;
+  color: #fff;
+  font-size: 1.5rem;
+  font-family: Inter;
+}
+
+.landing-container .greetings-container p {
+  color: #fff;
+  font-size: 1.2rem;
+  opacity: 0.8;
+}
+
+.landing-container .greetings-container a {
+  color: #fff;
+  text-decoration: underline;
+}
+
+.landing-container .form-container {
+  width: 60%;
+  padding: 30px 60px;
+  overflow-y: auto;
+}

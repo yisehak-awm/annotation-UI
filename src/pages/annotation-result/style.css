@@ -1,0 +1,49 @@
+.annotation-result-container {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.annotation-result-container .header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 45px;
+}
+
+.annotation-result-container .header img {
+  width: 3rem;
+}
+
+.annotation-result-container .content {
+  flex-grow: 1;
+  justify-content: center;
+  margin-top: 7.5%;
+  text-align: center;
+  max-width: 50%;
+}
+
+.annotation-result-container .content p {
+  font-size: 1.2rem;
+}
+.annotation-result-container .content button {
+  margin: 5px;
+}
+
+.annotation-result-container h1,
+.annotation-result-container h2 {
+  line-height: 1;
+  font-family: Inter;
+}
+
+.annotation-result-container h1 {
+  font-size: 1.2rem;
+  flex-shrink: 1;
+  margin-bottom: 0;
+}
+
+.annotation-result-container h2 {
+  font-size: 2.5rem;
+  font-weight: bold;
+}

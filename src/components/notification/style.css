@@ -1,0 +1,36 @@
+.y-notification {
+  box-sizing: border-box;
+  position: fixed;
+  display: block;
+  padding: 15px;
+  width: 30rem;
+  bottom: 2rem;
+  right: -30rem;
+  background-color: var(--color-active);
+  color: white;
+  transition: all 0.2s ease-in-out;
+}
+
+.error.y-notification {
+  background-color: var(--color-error);
+}
+
+.visible.y-notification {
+  right: 2rem;
+}
+
+.y-notification .title {
+  display: block;
+  font-size: 1.1rem;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.y-notification button {
+  background: none;
+  border: none;
+  padding: 0;
+  display: block;
+  font-weight: bold;
+  margin-top: 10px;
+}

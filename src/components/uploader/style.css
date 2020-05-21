@@ -1,0 +1,9 @@
+.si-uploader label {
+  position: absolute;
+  left: 0;
+  color: var(--color-active);
+}
+
+.si-uploader label:hover {
+  cursor: pointer;
+}
