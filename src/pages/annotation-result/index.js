@@ -37,6 +37,8 @@ export default function GeneAnnotationResult(props) {
     return status.statusMessage;
   }
 
+  console.log("STatus", status);
+
   return <Graph graph={graph} />;
 
   return (

@@ -8,20 +8,23 @@ export default function Graph({ graph }) {
   const [cy, setCy] = useState();
 
   useEffect(() => {
-    initViz();
+    configViz();
   }, []);
 
   // Initialize the visualization
-  const initViz = () => {
+  const configViz = () => {
     setCy(cytoscape({ ...CONFIG, container: cy_wrapper.current }));
   };
 
   useEffect(() => {
-    if (!cy) return;
-    console.log(graph.elements.nodes);
+    if (cy) draw();
+  }, [cy]);
+
+  // draw nodes and edges
+  const draw = () => {
     cy.json({ elements: { nodes: graph.elements.nodes } });
     cy.layout({ name: "preset" }).run();
-  }, [cy]);
+  };
 
   return <div className="viz-wrapper" ref={cy_wrapper} />;
 }

@@ -18,7 +18,7 @@ const reducer = (state, action) => {
         status: action.status,
         data: action.data,
       };
-    case "NETWORK_ERROR":
+    case "ERROR":
       return {
         ...state,
         loading: false,
@@ -34,9 +34,20 @@ export default function useResult(id) {
   const host = process.env.GRPC_ADDR || "https://annotation.mozi.ai/web";
 
   const fetchStatus = () =>
-    fetch(`${host}/status/${id}`).then((res) => res.json());
+    fetch(`${host}/status/${id}`)
+      .then((res) => {
+        if (!res.ok) throw Error(res.statusText);
+        return res;
+      })
+      .then((res) => res.json());
 
-  const fetchResult = () => fetch(`${host}/${id}`).then((res) => res.json());
+  const fetchResult = () =>
+    fetch(`${host}/${id}`)
+      .then((res) => {
+        if (!res.ok) throw Error(res.statusText);
+        return res;
+      })
+      .then((res) => res.json());
 
   useEffect(() => {
     dispatch({ type: "START_FETCHING" });
@@ -50,7 +61,7 @@ export default function useResult(id) {
           dispatch({ type: "UPDATE_STATUS", status });
         }
       } catch (error) {
-        dispatch({ type: "NETWORK_ERROR", error });
+        dispatch({ type: "ERROR", error });
       }
     })();
   }, [id]);
