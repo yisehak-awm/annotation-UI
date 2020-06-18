@@ -2,7 +2,7 @@ import React, { useState, useEffect, Fragment } from "react";
 import { HashRouter as Router, Route, Link, Redirect } from "react-router-dom";
 import {
   Button,
-  Alert,
+  // Alert,
   Spin,
   Typography,
   Icon,
@@ -15,7 +15,7 @@ import { RESULT_ADDR, downloadSchemeFile } from "../../service";
 import TabbedTables from "../../components/result-tables";
 import Visualizer from "../../components/visualizer";
 import Header from "../../components/header";
-import sessionNotFound from "../../assets/session-not-found.svg";
+// import sessionNotFound from "../../assets/session-not-found.svg";
 import "./style.css";
 const width = document.body.clientWidth || window.screen.width;
 
@@ -31,30 +31,42 @@ function AnnotationResult(props) {
   const [isFetchingResult, setFetchingResult] = useState(false);
   const [summary, setSummary] = useState(undefined);
   const [isSummaryShown, setSummaryShown] = useState(false);
-  const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
+  // const { ACTIVE, COMPLETED, ERROR } = AnnotationStatus;
   const id = props.match.params.id;
 
   useEffect(() => {
     if (id) {
       setFetchingResult(true);
-      fetch(`${RESULT_ADDR}/status/${id}`)
+      fetch(`${RESULT_ADDR}/${id}`)
         .then((res) => res.json())
-        .then((res) => {
-          if (res.status === 2)
-            return fetch(`${RESULT_ADDR}/${id}`)
-              .then((res) => res.json())
-              .then((result) => {
-                setFetchingResult(false);
-                setResponse(Object.assign({}, res, { result }));
-              });
+        .then((result) => {
           setFetchingResult(false);
-          setResponse({
-            status: AnnotationStatus.ERROR,
-            statusMessage: res.response,
-          });
+          setResponse({ result });
         });
     }
   }, []);
+
+  // useEffect(() => {
+  //   if (id) {
+  //     setFetchingResult(true);
+  //     fetch(`${RESULT_ADDR}/status/${id}`)
+  //       .then((res) => res.json())
+  //       .then((res) => {
+  //         if (res.status === 2)
+  //           return fetch(`${RESULT_ADDR}/${id}`)
+  //             .then((res) => res.json())
+  //             .then((result) => {
+  //               setFetchingResult(false);
+  //               setResponse(Object.assign({}, res, { result }));
+  //             });
+  //         setFetchingResult(false);
+  //         setResponse({
+  //           status: AnnotationStatus.ERROR,
+  //           statusMessage: res.response,
+  //         });
+  //       });
+  //   }
+  // }, []);
 
   const fetchTableData = (fileName) => {
     fetch(
@@ -71,35 +83,35 @@ function AnnotationResult(props) {
     });
   };
 
-  const renderActive = () => (
-    <Alert
-      type="info"
-      message="The annotation task is still processing, refresh the page to check again."
-      showIcon
-    />
-  );
+  // const renderActive = () => (
+  //   <Alert
+  //     type="info"
+  //     message="The annotation task is still processing, refresh the page to check again."
+  //     showIcon
+  //   />
+  // );
 
-  const renderError = () => (
-    <Fragment>
-      <img src={sessionNotFound} className="empty-state" />
-      <Typography.Paragraph className="call-to-action">
-        <Alert
-          type="error"
-          message={
-            <span>
-              {
-                <span>
-                  {response.statusMessage}. Try to
-                  <Link to="/"> run another annotation</Link>
-                </span>
-              }
-            </span>
-          }
-          showIcon
-        />
-      </Typography.Paragraph>
-    </Fragment>
-  );
+  // const renderError = () => (
+  //   <Fragment>
+  //     <img src={sessionNotFound} className="empty-state" />
+  //     <Typography.Paragraph className="call-to-action">
+  //       <Alert
+  //         type="error"
+  //         message={
+  //           <span>
+  //             {
+  //               <span>
+  //                 {response.statusMessage}. Try to
+  //                 <Link to="/"> run another annotation</Link>
+  //               </span>
+  //             }
+  //           </span>
+  //         }
+  //         showIcon
+  //       />
+  //     </Typography.Paragraph>
+  //   </Fragment>
+  // );
 
   const renderComplete = () => {
     const { nodes, edges } = response.result.elements;
@@ -241,15 +253,16 @@ function AnnotationResult(props) {
       {/* Logo and title */}
       <div className="landing-page container">
         <Header />
-        {response && response.status === COMPLETED && renderComplete()}
+        {/* {response && response.status === COMPLETED && renderComplete()}
         {response && response.status === ACTIVE && renderActive()}
-        {response && response.status === ERROR && renderError()}
+        {response && response.status === ERROR && renderError()} */}
         {/* Show loader if there is a request being processed */}
         {isFetchingResult && (
           <div className="spin-wrapper">
             <Spin /> Fetching results ...
           </div>
         )}
+        {!isFetchingResult && response && renderComplete()}
       </div>
       {/* Show the visualizer */}
       <Router>
