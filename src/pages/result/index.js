@@ -103,8 +103,8 @@ function AnnotationResult(props) {
           The result contains {nodes.length} entities and {edges.length}{" "}
           connections between them.
           <br />
-          This page will expire in{" "}
-          {distanceInWordsToNow(parse(response.expire_time * 1000))}.
+          {/* This page will expire in{" "}
+          {distanceInWordsToNow(parse(response.expire_time * 1000))}. */}
         </p>
         <div className="inline-buttons">
           <Button
