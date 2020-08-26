@@ -11,7 +11,11 @@ import {
   Table,
 } from "antd";
 import { parse, distanceInWordsToNow } from "date-fns";
-import { RESULT_ADDR, downloadSchemeFile } from "../../service";
+import {
+  RESULT_ADDR,
+  downloadSchemeFile,
+  downloadCSVfiles,
+} from "../../service";
 import TabbedTables from "../../components/result-tables";
 import Visualizer from "../../components/visualizer";
 import Header from "../../components/header";
@@ -121,8 +125,8 @@ function AnnotationResult(props) {
             View summary
           </Button>
 
-          <Button onClick={(e) => setTableShown(true)}>
-            View results table
+          <Button onClick={() => downloadCSVfiles(props.match.params.id)}>
+            Download CSV files
           </Button>
           <Button onClick={() => downloadSchemeFile(props.match.params.id)}>
             Download Scheme File
